@@ -47,27 +47,40 @@ export default function Header() {
     if (compact === false) setOpen(false);
   }, [compact]);
 
-  // highlight the section whose wash has finished
+  // highlight the section whose wash has finished. Section offsets are measured on load and whenever the page
+  // changes size; scrolling only compares them with scrollY, so it never forces a layout.
   useEffect(() => {
-    let ticking = false;
+    let tops: [string, number][] = [];
+    let raf = 0;
     const update = () => {
-      ticking = false;
-      const vh = window.innerHeight;
+      raf = 0;
+      const line = window.scrollY + window.innerHeight * 0.5;
       let current = "";
-      for (const id of nav) {
-        const el = document.getElementById(id);
-        if (el && el.getBoundingClientRect().top <= vh * 0.5) current = id;
-      }
+      for (const [id, top] of tops) if (top <= line) current = id;
       setActive(current);
     };
-    const onScroll = () => {
-      if (ticking) return;
-      ticking = true;
-      requestAnimationFrame(update);
+    const measure = () => {
+      tops = [];
+      for (const id of nav) {
+        const el = document.getElementById(id);
+        if (el) tops.push([id, el.getBoundingClientRect().top + window.scrollY]);
+      }
+      update();
     };
-    update();
+    const onScroll = () => {
+      if (!raf) raf = requestAnimationFrame(update);
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(document.body);
     window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    window.addEventListener("resize", measure);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", measure);
+      if (raf) cancelAnimationFrame(raf);
+    };
   }, []);
 
   useEffect(() => {
