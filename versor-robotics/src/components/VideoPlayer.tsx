@@ -47,7 +47,7 @@ export default function VideoPlayer() {
             ref={videoRef}
             className={styles.media}
             src={src}
-            poster={poster}
+            poster={poster || undefined}
             controls
             playsInline
             preload="metadata"

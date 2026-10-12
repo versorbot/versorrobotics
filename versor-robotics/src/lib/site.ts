@@ -37,14 +37,14 @@ export const site: SiteConfig = {
 
   /* ── VIDEO ───────────────────────────────────────────────────
    * Option A (self-hosted): drop your file at  public/videos/versor-demo.mp4
-   *   and (optionally) a poster image at       public/videos/poster.jpg
+   *   and (optionally) a poster image at       public/videos/poster.jpg, then set poster: "/videos/poster.jpg"
    * Option B (YouTube):     put the 11-character video id in `youtubeId`
    *   e.g. for https://youtu.be/dQw4w9WgXcQ  →  youtubeId: "dQw4w9WgXcQ"
    * If youtubeId is set it wins. If neither works, a "coming soon" TV shows.
    */
   video: {
     src: "/videos/versor-demo.mp4",
-    poster: "/videos/poster.jpg",
+    poster: "", // no thumbnail yet: an empty string means the player asks for none
     youtubeId: "",
   },
 

@@ -37,7 +37,7 @@ The video lives in a retro TV in the **Video** section. Pick one:
 
 **A. Self-hosted file** (simplest)
 1. Export an MP4 (H.264) and name it `versor-demo.mp4`.
-2. Drop it in `public/videos/` (optional: a thumbnail at `public/videos/poster.jpg`).
+2. Drop it in `public/videos/` (optional: a thumbnail at `public/videos/poster.jpg`, then set `poster: "/videos/poster.jpg"` in `src/lib/site.ts`).
 3. Redeploy. That's it. Keep the file reasonably small (compress with HandBrake); for long or large videos use B or C.
 
 **B. YouTube**
