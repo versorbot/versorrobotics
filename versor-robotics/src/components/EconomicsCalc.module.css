@@ -1,0 +1,622 @@
+/* Unit economics calculator. Layout as in reference/versor-unit-economics.html: slider panel on the left,
+ * results on the right; one column at 1000px and below. Everything is scoped to .econ and the palette (the
+ * site's dark colours) lives on it. Green = good, amber = caution, red = bad, light steel = neutral. */
+
+.econ {
+  --bg: #131f1d;
+  --panel: #182624;
+  --card: #1d2e2b;
+  --well: #14211f;
+  --line: #2a403c;
+  --line-strong: #3b5853;
+  --text: #f3e9d8;
+  --text-2: rgba(243, 233, 216, 0.82);
+  --muted: rgba(243, 233, 216, 0.62);
+  --faint: rgba(243, 233, 216, 0.5);
+  --accent: #93c6d3;
+  --good: #9cc47a;
+  --warn: #f0b95a;
+  --bad: #f2806a;
+  --bar-rev: #5f8244;
+  --bar-opex: #a8381d;
+  --bar-dep: #7a5636;
+  --bar-cm: #3f7384;
+  --track: #2f4743;
+  --thumb: #f0b95a;
+  --font-head: "Syne", "Montserrat Variable", system-ui, sans-serif;
+  --font-mono: "DM Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --font-ui: "Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  background: var(--bg);
+  color: var(--text);
+  font: 400 14px/1.45 var(--font-ui);
+  letter-spacing: normal;
+  color-scheme: dark;
+}
+
+.econ *,
+.econ *::before,
+.econ *::after {
+  box-sizing: border-box;
+}
+
+.page {
+  max-width: 1128px;
+  margin: 0 auto;
+  padding: 8px 24px 64px;
+}
+
+/* ───────── title row + mode tabs ───────── */
+
+.top {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.top h2 {
+  margin: 0;
+  font-family: var(--font-head);
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--text);
+}
+
+.top p {
+  margin: 6px 0 0;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tab {
+  min-height: 44px;
+  padding: 8px 18px;
+  font: 600 12px/1.2 var(--font-ui);
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  background: transparent;
+  border: 2px solid var(--line-strong);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s, background-color 0.2s;
+}
+
+.tab:hover {
+  color: var(--text);
+  border-color: var(--muted);
+}
+
+.tab.active {
+  color: #131f1d;
+  background: var(--warn);
+  border-color: var(--warn);
+}
+
+.tab:focus-visible {
+  outline: 3px solid var(--warn);
+  outline-offset: 2px;
+}
+
+/* ───────── layout ───────── */
+
+.layout {
+  display: grid;
+  grid-template-columns: 300px minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+/* ───────── parameters ───────── */
+
+.sliders {
+  padding: 20px 22px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.panelTitle {
+  margin-bottom: 14px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--warn);
+}
+
+.sliderGroup {
+  margin-bottom: 8px;
+}
+
+.sgLabel {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.sgName {
+  font-size: 12.5px;
+  color: var(--text-2);
+}
+
+.sgVal {
+  flex: none;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--accent);
+}
+
+/* The input is a 44px-tall touch target, 44px wider than the column so the thumb's centre travels the full
+ * column width; the 4px track is painted as its background. */
+.range {
+  display: block;
+  width: calc(100% + 44px);
+  height: 44px;
+  margin: -6px -22px -8px;
+  padding: 0;
+  background: linear-gradient(var(--track), var(--track)) center / calc(100% - 44px) 4px no-repeat;
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  touch-action: pan-y;
+}
+
+.range::-webkit-slider-runnable-track {
+  height: 44px;
+  background: transparent;
+  border: none;
+}
+
+.range::-moz-range-track {
+  height: 44px;
+  background: transparent;
+  border: none;
+}
+
+/* 44×44 square hit area (no border-radius, which would make Chrome hit-test a circle), 16px dot */
+.range::-webkit-slider-thumb {
+  width: 44px;
+  height: 44px;
+  background: radial-gradient(circle, var(--thumb) 0 6px, var(--panel) 6.5px 8.5px, transparent 9px);
+  border: none;
+  border-radius: 0;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.range::-moz-range-thumb {
+  width: 44px;
+  height: 44px;
+  background: radial-gradient(circle, var(--thumb) 0 6px, var(--panel) 6.5px 8.5px, transparent 9px);
+  border: none;
+  border-radius: 0;
+  cursor: pointer;
+}
+
+.range:focus-visible::-webkit-slider-thumb {
+  background: radial-gradient(circle, var(--thumb) 0 6px, var(--panel) 6.5px 8.5px, var(--text) 9px 11px, transparent 11.5px);
+}
+
+.range:focus-visible::-moz-range-thumb {
+  background: radial-gradient(circle, var(--thumb) 0 6px, var(--panel) 6.5px 8.5px, var(--text) 9px 11px, transparent 11.5px);
+}
+
+.sgRange {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: var(--faint);
+}
+
+.dividerSm {
+  margin: 12px 0 14px;
+  border-top: 1px solid var(--line);
+}
+
+.formulaNote {
+  margin-top: 10px;
+  padding: 9px 11px;
+  font-size: 11px;
+  line-height: 1.65;
+  color: var(--muted);
+  background: var(--well);
+  border-left: 3px solid var(--line-strong);
+  border-radius: 4px;
+}
+
+.noteHead {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.noteVal {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* ───────── results ───────── */
+
+.results {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+.banner {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  padding: 16px 20px;
+  background: var(--panel);
+  border: 2px solid var(--line-strong);
+  border-radius: 8px;
+  box-shadow: 6px 6px 0 #0b1413;
+}
+
+.sbItem {
+  text-align: center;
+}
+
+.sbLabel {
+  margin-bottom: 4px;
+  font-size: 11px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.sbVal {
+  font-family: var(--font-mono);
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--accent);
+}
+
+.sbSub {
+  margin-top: 2px;
+  font-size: 10.5px;
+  color: var(--faint);
+}
+
+.block {
+  padding: 18px 20px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.blockDirect {
+  border-top: 3px solid var(--good);
+}
+
+.blockRaas {
+  border-top: 3px solid var(--warn);
+}
+
+.block.hidden {
+  display: none;
+}
+
+.modelHdr {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 10px;
+  margin-bottom: 16px;
+}
+
+.badge {
+  padding: 3px 10px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border-radius: 20px;
+}
+
+.badgeTeal {
+  color: var(--good);
+  background: rgba(156, 196, 122, 0.12);
+  border: 1px solid rgba(156, 196, 122, 0.4);
+}
+
+.badgeAmber {
+  color: var(--warn);
+  background: rgba(240, 185, 90, 0.12);
+  border: 1px solid rgba(240, 185, 90, 0.4);
+}
+
+.modelTitle {
+  font-family: var(--font-head);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.metric {
+  padding: 10px 12px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+}
+
+.metricLbl {
+  margin-bottom: 4px;
+  font-size: 10px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.metricVal {
+  font-family: var(--font-mono);
+  font-size: 17px;
+  font-weight: 500;
+  color: var(--accent);
+  overflow-wrap: anywhere;
+}
+
+.metricSub {
+  margin-top: 2px;
+  font-size: 10px;
+  color: var(--faint);
+}
+
+.green {
+  color: var(--good);
+}
+
+.amber {
+  color: var(--warn);
+}
+
+.red {
+  color: var(--bad);
+}
+
+.blue {
+  color: var(--accent);
+}
+
+/* ───────── waterfalls ───────── */
+
+.waterfall {
+  margin-top: 4px;
+}
+
+.wfTitle {
+  margin-bottom: 8px;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.wfRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 5px;
+}
+
+.wfLbl {
+  flex-shrink: 0;
+  width: 200px;
+  font-size: 11px;
+  text-align: right;
+  color: var(--text-2);
+}
+
+.wfBarWrap {
+  flex: 1;
+  min-width: 0;
+  height: 18px;
+  overflow: hidden;
+  background: var(--well);
+  border-radius: 3px;
+}
+
+.wfBar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  height: 100%;
+  padding-right: 6px;
+  border-radius: 3px;
+  transition: width 0.4s ease;
+}
+
+.wfBar span {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  white-space: nowrap;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.wf-rev {
+  background: var(--bar-rev);
+}
+
+.wf-opex {
+  background: var(--bar-opex);
+}
+
+.wf-dep {
+  background: var(--bar-dep);
+}
+
+.wf-cm {
+  background: var(--bar-cm);
+}
+
+/* ───────── cash-flow chart ───────── */
+
+.chartTitle {
+  margin: 14px 0 4px;
+}
+
+.chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 90px;
+  margin-top: 10px;
+  padding: 0 4px;
+}
+
+.barCol {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+
+.b {
+  width: 100%;
+  border-radius: 3px 3px 0 0;
+  transition: height 0.4s ease;
+}
+
+.bNeg {
+  background: var(--bar-opex);
+}
+
+.bPos {
+  background: var(--bar-rev);
+}
+
+.bl {
+  font-size: 9px;
+  color: var(--muted);
+}
+
+.sanity {
+  margin-top: 12px;
+  padding: 10px 14px;
+  font-size: 11.5px;
+  line-height: 1.8;
+  color: var(--muted);
+  background: var(--well);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+}
+
+.sanity span {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  color: var(--accent);
+}
+
+.sanity .ok {
+  color: var(--good);
+}
+
+.sanity .bad {
+  color: var(--bad);
+}
+
+.note {
+  margin: 4px 0 0;
+  font-size: 11px;
+  font-style: italic;
+  line-height: 1.6;
+  color: var(--faint);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wfBar,
+  .b,
+  .tab {
+    transition: none;
+  }
+}
+
+/* ───────── tablet ───────── */
+
+@media (max-width: 1000px) {
+  .page {
+    padding-inline: 16px;
+  }
+
+  .layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* ───────── phone ───────── */
+
+@media (max-width: 560px) {
+  .top {
+    align-items: flex-start;
+  }
+
+  .tabs {
+    width: 100%;
+  }
+
+  .tab {
+    flex: 1 1 auto;
+    padding-inline: 12px;
+  }
+
+  .banner {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+    padding: 14px 16px;
+    box-shadow: 4px 4px 0 #0b1413;
+  }
+
+  .block {
+    padding: 16px 14px;
+  }
+
+  .metrics {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .wfRow {
+    flex-wrap: wrap;
+    gap: 3px;
+    margin-bottom: 9px;
+  }
+
+  .wfLbl {
+    width: 100%;
+    text-align: left;
+  }
+
+  .wfBarWrap {
+    flex-basis: 100%;
+  }
+}

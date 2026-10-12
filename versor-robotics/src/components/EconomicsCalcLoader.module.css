@@ -1,0 +1,12 @@
+/* holds the calculator's place (same dark background) while its code loads */
+.loading {
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+  padding: 16px;
+  background: #131f1d;
+  color: rgba(243, 233, 216, 0.62);
+  font-family: var(--font-label);
+  font-size: 13px;
+  font-weight: 700;
+}

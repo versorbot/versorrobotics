@@ -23,6 +23,7 @@ export default function Footer() {
             </a>
           ))}
           <Link href="/simulator">{t("simulator")}</Link>
+          <Link href="/economics">{t("economics")}</Link>
         </nav>
         <p className={styles.copy}>
           &copy; {new Date().getFullYear()} <span lang="en">{site.name}</span>. {t("tagline")}

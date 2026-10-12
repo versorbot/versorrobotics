@@ -1,0 +1,28 @@
+.intro {
+  padding-top: calc(var(--header-h) + clamp(32px, 7vh, 72px));
+  padding-bottom: clamp(28px, 5vh, 48px);
+}
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 22px;
+  font-family: var(--font-label);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--cream-70);
+}
+
+.back:hover {
+  color: var(--amber);
+}
+
+.note {
+  margin: 14px 0 0;
+  font-size: 14px;
+  color: var(--cream-50);
+}

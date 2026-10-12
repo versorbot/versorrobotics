@@ -66,10 +66,16 @@ export default function Products() {
                         {t("cta")}
                       </a>
                       {p.id === "spray" ? (
-                        <Link href="/simulator" className={styles.simLink}>
-                          {t("simulator")}
-                          <ArrowRight size={16} aria-hidden="true" />
-                        </Link>
+                        <>
+                          <Link href="/simulator" className={styles.simLink}>
+                            {t("simulator")}
+                            <ArrowRight size={16} aria-hidden="true" />
+                          </Link>
+                          <Link href="/economics" className={styles.simLink}>
+                            {t("economics")}
+                            <ArrowRight size={16} aria-hidden="true" />
+                          </Link>
+                        </>
                       ) : null}
                     </div>
                   </div>

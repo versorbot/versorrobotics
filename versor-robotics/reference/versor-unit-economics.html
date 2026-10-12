@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Versor Robotics — Unit Economics Calculator</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700&family=DM+Mono:wght@400;500&family=Instrument+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#070F14;color:#D0E8F0;font-family:'Instrument Sans',sans-serif;min-height:100vh;padding:32px 24px 48px}
+.page{max-width:1080px;margin:0 auto}
+.top{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:28px;gap:16px;flex-wrap:wrap}
+.top h1{font-family:'Syne',sans-serif;font-size:22px;font-weight:700;color:#A8D8F0;line-height:1.2}
+.top p{font-size:11px;color:#3A6A86;text-transform:uppercase;letter-spacing:.08em;margin-top:4px}
+.mode-tabs{display:flex;gap:4px}
+.tab{padding:7px 18px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid #1D4060;background:transparent;color:#4A7A96;transition:.2s;font-family:'Instrument Sans',sans-serif}
+.tab.active{background:#1A3A52;color:#56B4D3;border-color:#56B4D3}
+.layout{display:grid;grid-template-columns:300px 1fr;gap:16px;align-items:start}
+.sliders-panel{background:#0C1E2A;border:0.5px solid #152E42;border-radius:14px;padding:20px 18px}
+.panel-title{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:#3A6A86;margin-bottom:16px}
+.slider-group{margin-bottom:16px}
+.sg-label{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px}
+.sg-name{font-size:12px;color:#9ABFCF}
+.sg-val{font-family:'DM Mono',monospace;font-size:13px;font-weight:500;color:#56B4D3}
+input[type=range]{width:100%;-webkit-appearance:none;height:4px;border-radius:2px;background:#152E42;outline:none;cursor:pointer}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:#56B4D3;cursor:pointer;border:2px solid #0C1E2A}
+.sg-range{display:flex;justify-content:space-between;font-size:9px;color:#2A5A76;margin-top:3px}
+.divider-sm{border:none;border-top:0.5px solid #152E42;margin:14px 0}
+.formula-note{font-size:10px;color:#4A7A96;line-height:1.6;margin-top:8px;padding:8px 10px;background:#0A1620;border-radius:6px;border-left:2px solid #1D4060}
+.results{display:flex;flex-direction:column;gap:12px}
+.model-block{background:#0C1E2A;border:0.5px solid #152E42;border-radius:14px;padding:18px 20px}
+.model-block.hidden{display:none}
+.model-hdr{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.model-badge{font-size:9px;font-weight:700;padding:3px 10px;border-radius:20px;letter-spacing:.06em;text-transform:uppercase}
+.badge-teal{background:#0A2A24;color:#0DC9A0;border:1px solid #0E4A3A}
+.badge-amber{background:#2A1E08;color:#F5A623;border:1px solid #4A360A}
+.model-title{font-family:'Syne',sans-serif;font-size:13px;font-weight:600;color:#B8D8EA}
+.metrics-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+.metric{background:#0D1E2A;border:0.5px solid #152E42;border-radius:9px;padding:10px 12px}
+.metric-lbl{font-size:9px;color:#3A6A86;text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px}
+.metric-val{font-family:'DM Mono',monospace;font-size:17px;font-weight:500;color:#56B4D3}
+.metric-val.green{color:#4CAF8A}.metric-val.amber{color:#F5A623}.metric-val.red{color:#F28B82}
+.metric-sub{font-size:9px;color:#3A6A86;margin-top:2px}
+.waterfall{margin-top:4px}
+.wf-title{font-size:10px;color:#3A6A86;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
+.wf-row{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+.wf-lbl{font-size:10px;color:#7AAABF;width:200px;flex-shrink:0;text-align:right}
+.wf-bar-wrap{flex:1;background:#0D1A22;border-radius:3px;height:16px;overflow:hidden}
+.wf-bar{height:100%;border-radius:3px;transition:width .4s ease;display:flex;align-items:center;justify-content:flex-end;padding-right:6px}
+.wf-bar span{font-size:9px;font-weight:600;color:rgba(255,255,255,.85);font-family:'DM Mono',monospace;white-space:nowrap}
+.wf-rev{background:#1A6A4A}.wf-opex{background:#6A1A1A}.wf-dep{background:#3A2A0A}.wf-cm{background:#0A5A8A}
+.chart-wrap{height:90px;display:flex;align-items:flex-end;gap:3px;padding:0 4px;margin-top:10px}
+.bar-col{display:flex;flex-direction:column;align-items:center;gap:3px;flex:1}
+.bar-col .b{border-radius:3px 3px 0 0;width:100%;transition:height .4s ease}
+.bar-col .bl{font-size:8px;color:#3A6A86}
+.b-neg{background:#6A1A1A}.b-pos{background:#1A5A3A}
+.summary-banner{background:#0A1E2A;border:1px solid #1D4060;border-radius:12px;padding:16px 20px;display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.sb-item{text-align:center}
+.sb-label{font-size:10px;color:#3A6A86;text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px}
+.sb-val{font-family:'DM Mono',monospace;font-size:20px;font-weight:500}
+.sb-val.green{color:#4CAF8A}.sb-val.amber{color:#F5A623}.sb-val.blue{color:#56B4D3}
+.sb-sub{font-size:9px;color:#3A6A86;margin-top:2px}
+.sanity-box{background:#0A1620;border:0.5px solid #1D3A50;border-radius:8px;padding:10px 14px;margin-top:12px;font-size:11px;color:#4A7A96;line-height:1.8}
+.sanity-box span{color:#56B4D3;font-family:'DM Mono',monospace;font-weight:500}
+.note{font-size:10px;color:#2A5A76;line-height:1.6;margin-top:4px;font-style:italic}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="top">
+    <div>
+      <h1>Unit Economics Calculator</h1>
+      <p>Versor Robotics · Corrected model · Revenue = farms/day × acres/farm × rate × working days</p>
+    </div>
+    <div class="mode-tabs">
+      <button class="tab active" onclick="setMode('both',event)">Both Models</button>
+      <button class="tab" onclick="setMode('direct',event)">Direct Sale</button>
+      <button class="tab" onclick="setMode('raas',event)">RaaS Only</button>
+    </div>
+  </div>
+
+  <div class="layout">
+    <div class="sliders-panel">
+      <div class="panel-title">Parameters</div>
+
+      <div class="slider-group">
+        <div class="sg-label"><span class="sg-name">Working days / year</span><span class="sg-val" id="v-days">200 days</span></div>
+        <input type="range" id="s-days" min="100" max="300" step="10" value="200" oninput="calc()">
+        <div class="sg-range"><span>100d</span><span>300d</span></div>
+      </div>
+      <div class="slider-group">
+        <div class="sg-label"><span class="sg-name">Farms served per day</span><span class="sg-val" id="v-farms">4 farms</span></div>
+        <input type="range" id="s-farms" min="1" max="8" step="1" value="4" oninput="calc()">
+        <div class="sg-range"><span>1</span><span>8</span></div>
+      </div>
+      <div class="slider-group">
+        <div class="sg-label"><span class="sg-name">Avg farm size (acres)</span><span class="sg-val" id="v-acres">2 acres</span></div>
+        <input type="range" id="s-acres" min="1" max="10" step="0.5" value="2" oninput="calc()">
+        <div class="sg-range"><span>1</span><span>10</span></div>
+      </div>
+      <div class="slider-group">
+        <div class="sg-label"><span class="sg-name">RaaS rate (₹/acre/spray)</span><span class="sg-val" id="v-rate">₹400</span></div>
+        <input type="range" id="s-rate" min="200" max="800" step="25" value="400" oninput="calc()">
+        <div class="sg-range"><span>₹200</span><span>₹800</span></div>
+      </div>
+      <div class="slider-group">
+        <div class="sg-label"><span class="sg-name">Sprays per season (pricing)</span><span class="sg-val" id="v-sprays">10</span></div>
+        <input type="range" id="s-sprays" min="4" max="20" step="1" value="10" oninput="calc()">
+        <div class="sg-range"><span>4</span><span>20</span></div>
+      </div>
+      <div class="divider-sm"></div>
+      <div class="slider-group">
+        <div class="sg-label"><span class="sg-name">Robot build cost (₹)</span><span class="sg-val" id="v-build">₹7.0L</span></div>
+        <input type="range" id="s-build" min="300000" max="900000" step="10000" value="700000" oninput="calc()">
+        <div class="sg-range"><span>₹3L</span><span>₹9L</span></div>
+      </div>
+      <div class="slider-group">
+        <div class="sg-label"><span class="sg-name">OpEx / robot / year (₹)</span><span class="sg-val" id="v-opex">₹1.1L</span></div>
+        <input type="range" id="s-opex" min="40000" max="300000" step="5000" value="111000" oninput="calc()">
+        <div class="sg-range"><span>₹40K</span><span>₹3L</span></div>
+      </div>
+      <div class="divider-sm"></div>
+      <div class="slider-group">
+        <div class="sg-label"><span class="sg-name">Sale price per robot (₹)</span><span class="sg-val" id="v-sale">₹10.0L</span></div>
+        <input type="range" id="s-sale" min="500000" max="2000000" step="50000" value="1000000" oninput="calc()">
+        <div class="sg-range"><span>₹5L</span><span>₹20L</span></div>
+      </div>
+      <div class="slider-group">
+        <div class="sg-label"><span class="sg-name">Annual SLA fee / robot (₹)</span><span class="sg-val" id="v-sla">₹50K</span></div>
+        <input type="range" id="s-sla" min="10000" max="150000" step="5000" value="50000" oninput="calc()">
+        <div class="sg-range"><span>₹10K</span><span>₹1.5L</span></div>
+      </div>
+      <div class="slider-group">
+        <div class="sg-label"><span class="sg-name">Avg robots per customer</span><span class="sg-val" id="v-rpc">2 robots</span></div>
+        <input type="range" id="s-rpc" min="1" max="10" step="1" value="2" oninput="calc()">
+        <div class="sg-range"><span>1</span><span>10</span></div>
+      </div>
+      <div class="slider-group">
+        <div class="sg-label"><span class="sg-name">CAC per customer (₹)</span><span class="sg-val" id="v-cac">₹1.1L</span></div>
+        <input type="range" id="s-cac" min="20000" max="500000" step="10000" value="114000" oninput="calc()">
+        <div class="sg-range"><span>₹20K</span><span>₹5L</span></div>
+      </div>
+      <div class="slider-group">
+        <div class="sg-label"><span class="sg-name">LTV horizon (years)</span><span class="sg-val" id="v-ltv">5 yrs</span></div>
+        <input type="range" id="s-ltv" min="1" max="10" step="1" value="5" oninput="calc()">
+        <div class="sg-range"><span>1yr</span><span>10yr</span></div>
+      </div>
+      <div class="formula-note" id="formula-note"></div>
+    </div>
+
+    <div class="results">
+      <div class="summary-banner">
+        <div class="sb-item">
+          <div class="sb-label">Gross margin (initial)</div>
+          <div class="sb-val green" id="r-gm-init">—</div>
+          <div class="sb-sub">on direct sale</div>
+        </div>
+        <div class="sb-item">
+          <div class="sb-label">RaaS contribution margin</div>
+          <div class="sb-val amber" id="r-cm">—</div>
+          <div class="sb-sub">revenue minus all costs</div>
+        </div>
+        <div class="sb-item">
+          <div class="sb-label">Asset payback</div>
+          <div class="sb-val blue" id="r-payback">—</div>
+          <div class="sb-sub">months to recover robot cost</div>
+        </div>
+      </div>
+
+      <div class="model-block" id="block-direct">
+        <div class="model-hdr">
+          <span class="model-badge badge-teal">Direct Sale</span>
+          <span class="model-title">Large Farms & FPOs — Ownership Model</span>
+        </div>
+        <div class="metrics-grid">
+          <div class="metric"><div class="metric-lbl">Gross profit / robot</div><div class="metric-val green" id="r-gp">—</div><div class="metric-sub">initial batch</div></div>
+          <div class="metric"><div class="metric-lbl">Gross margin</div><div class="metric-val green" id="r-gm">—</div><div class="metric-sub">initial → 100-unit batch</div></div>
+          <div class="metric"><div class="metric-lbl">Total LTV / customer</div><div class="metric-val" id="r-ltv">—</div><div class="metric-sub">hardware + SLA</div></div>
+          <div class="metric"><div class="metric-lbl">LTV : CAC</div><div class="metric-val" id="r-ltvcac">—</div><div class="metric-sub">target >3x</div></div>
+        </div>
+        <div class="waterfall">
+          <div class="wf-title">Revenue per customer breakdown</div>
+          <div id="wf-direct"></div>
+        </div>
+      </div>
+
+      <div class="model-block" id="block-raas">
+        <div class="model-hdr">
+          <span class="model-badge badge-amber">RaaS</span>
+          <span class="model-title">Small & Marginal Farmers — Robot as a Service</span>
+        </div>
+        <div class="metrics-grid">
+          <div class="metric"><div class="metric-lbl">Acres served / day</div><div class="metric-val" id="r-acres-day">—</div><div class="metric-sub">farms × avg size</div></div>
+          <div class="metric"><div class="metric-lbl">Revenue / robot / yr</div><div class="metric-val amber" id="r-rev">—</div><div class="metric-sub">acres/day × rate × days</div></div>
+          <div class="metric"><div class="metric-lbl">Contribution margin/yr</div><div class="metric-val green" id="r-cm2">—</div><div class="metric-sub">after opex + depreciation</div></div>
+          <div class="metric"><div class="metric-lbl">Asset payback</div><div class="metric-val" id="r-pb2">—</div><div class="metric-sub">months</div></div>
+        </div>
+        <div class="waterfall">
+          <div class="wf-title">Per-robot annual P&L waterfall</div>
+          <div id="wf-raas"></div>
+        </div>
+        <div class="wf-title" style="margin-top:14px;margin-bottom:4px">Cumulative cash flow — 5 years</div>
+        <div class="chart-wrap" id="chart-payback"></div>
+        <div class="sanity-box" id="sanity-box"></div>
+      </div>
+
+      <p class="note" id="bottom-note"></p>
+    </div>
+  </div>
+</div>
+
+<script>
+const fmt=(n,c=false)=>{if(c){if(n>=10000000)return'₹'+(n/10000000).toFixed(1)+'Cr';if(n>=100000)return'₹'+(n/100000).toFixed(1)+'L';if(n>=1000)return'₹'+Math.round(n/1000)+'K';return'₹'+Math.round(n);}return'₹'+Math.round(n).toLocaleString('en-IN');};
+const pct=n=>(n*100).toFixed(1)+'%';
+const xf=n=>n.toFixed(1)+'x';
+const mof=n=>n.toFixed(1)+' mo';
+const gv=id=>parseFloat(document.getElementById(id).value);
+const set=(id,val)=>{const e=document.getElementById(id);if(e)e.textContent=val;};
+const setC=(id,cls)=>{const e=document.getElementById(id);if(!e)return;e.className=e.className.replace(/\bgreen\b|\bamber\b|\bred\b|\bblue\b/g,'').trim()+' '+cls;};
+
+function wfBar(label,amount,maxAmt,cls){
+  const w=Math.max(2,Math.min(100,Math.abs(amount)/maxAmt*100));
+  const disp=amount<0?'('+fmt(Math.abs(amount),true)+')':fmt(amount,true);
+  return`<div class="wf-row"><span class="wf-lbl">${label}</span><div class="wf-bar-wrap"><div class="wf-bar ${cls}" style="width:${w.toFixed(1)}%"><span>${disp}</span></div></div></div>`;
+}
+
+function calc(){
+  const days=gv('s-days'), farms=gv('s-farms'), acres=gv('s-acres'), rate=gv('s-rate');
+  const sprays=gv('s-sprays'), build=gv('s-build'), opex=gv('s-opex');
+  const sale=gv('s-sale'), sla=gv('s-sla'), rpc=gv('s-rpc');
+  const cac=gv('s-cac'), ltvYrs=gv('s-ltv');
+
+  set('v-days',days+' days'); set('v-farms',farms+' farms'); set('v-acres',acres+' acres');
+  set('v-rate','₹'+rate); set('v-sprays',sprays); set('v-build',fmt(build,true));
+  set('v-opex',fmt(opex,true)); set('v-sale',fmt(sale,true)); set('v-sla',fmt(sla,true));
+  set('v-rpc',rpc+' robots'); set('v-cac',fmt(cac,true)); set('v-ltv',ltvYrs+' yrs');
+
+  // RaaS — corrected formula
+  const acresDay = farms * acres;
+  const rev      = acresDay * rate * days;
+  const dep      = build / 5;
+  const cm       = rev - opex - dep;
+  const cmPct    = rev > 0 ? cm / rev : 0;
+  const pb       = (rev - opex) > 0 ? (build / (rev - opex)) * 12 : 999;
+
+  // Sanity check
+  const revPerFarmer  = acres * rate * sprays * 2;
+  const uniqueFarmers = (days * farms) / (sprays * 2);
+  const crossCheck    = uniqueFarmers * revPerFarmer;
+
+  // Direct sale
+  const gp_init  = sale - build;
+  const gm_init  = gp_init / sale;
+  const gm_scale = (sale - build * 0.70) / sale;
+  const ltv_hw   = sale * rpc;
+  const ltv_sla  = sla * rpc * ltvYrs;
+  const ltv      = ltv_hw + ltv_sla;
+  const ltvcac   = ltv / cac;
+
+  // Summary
+  set('r-gm-init',pct(gm_init)); setC('r-gm-init',gm_init>=.3?'green':gm_init>0?'amber':'red');
+  set('r-cm',pct(cmPct));        setC('r-cm',cmPct>=.5?'green':cmPct>0?'amber':'red');
+  set('r-payback',pb<24?mof(pb):'>24 mo'); setC('r-payback',pb<12?'green':pb<24?'amber':'red');
+
+  // Direct sale
+  set('r-gp',fmt(gp_init,true)); setC('r-gp',gp_init>=0?'green':'red');
+  set('r-gm',pct(gm_init)+' → '+pct(gm_scale)); setC('r-gm',gm_init>=.3?'green':'amber');
+  set('r-ltv',fmt(ltv,true));
+  set('r-ltvcac',xf(ltvcac)); setC('r-ltvcac',ltvcac>=5?'green':ltvcac>=3?'amber':'red');
+
+  const maxDS=ltv;
+  document.getElementById('wf-direct').innerHTML=
+    wfBar('Hardware revenue ('+rpc+' robots)',ltv_hw,maxDS,'wf-rev')+
+    wfBar('SLA revenue ('+ltvYrs+' yrs × '+rpc+')',ltv_sla,maxDS,'wf-cm')+
+    wfBar('CAC (acquisition cost)',cac,maxDS,'wf-opex')+
+    wfBar('Net LTV after CAC',ltv-cac,maxDS,'wf-cm');
+
+  // RaaS
+  set('r-acres-day',acresDay.toFixed(1)+' acres');
+  set('r-rev',fmt(rev,true)); setC('r-rev',rev>opex+dep?'amber':'red');
+  set('r-cm2',fmt(cm,true)); setC('r-cm2',cm>0?'green':'red');
+  set('r-pb2',pb<999?mof(pb):'N/A'); setC('r-pb2',pb<12?'green':pb<24?'amber':'red');
+
+  document.getElementById('wf-raas').innerHTML=
+    wfBar('Revenue (spraying service)',rev,rev,'wf-rev')+
+    wfBar('OpEx (maintenance, ops, transport)',opex,rev,'wf-opex')+
+    wfBar('Depreciation (robot ÷ 5 yrs)',dep,rev,'wf-dep')+
+    wfBar('Contribution margin',Math.max(0,cm),rev,'wf-cm');
+
+  // Cash flow chart
+  const net=rev-opex;
+  const cfs=[0,1,2,3,4,5].map(y=>y===0?-build:-build+net*y);
+  const maxA=Math.max(...cfs.map(Math.abs));
+  document.getElementById('chart-payback').innerHTML=cfs.map((cf,i)=>{
+    const h=Math.max(4,Math.round(Math.abs(cf)/maxA*70));
+    return`<div class="bar-col"><div style="height:${cf<0?70-h:0}px"></div><div class="b ${cf<0?'b-neg':'b-pos'}" style="height:${h}px"></div><span class="bl">Y${i}</span></div>`;
+  }).join('');
+
+  // Sanity check
+  const ok=Math.abs(crossCheck-rev)<1;
+  document.getElementById('sanity-box').innerHTML=
+    `<strong style="color:#9ABFCF">Farmer-side sanity check</strong><br>`+
+    `Each farmer (${acres} ac): ${acres} × ₹${rate} × ${sprays} sprays × 2 seasons = <span>${fmt(revPerFarmer,true)}/yr</span><br>`+
+    `Unique farmers/yr: ${days}d × ${farms} farms ÷ (${sprays} × 2 seasons) = <span>${Math.round(uniqueFarmers)} farmers</span><br>`+
+    `Cross-check: <span>${Math.round(uniqueFarmers)}</span> × <span>${fmt(revPerFarmer,true)}</span> = <span>${fmt(crossCheck,true)}</span> `+
+    (ok?'<span style="color:#4CAF8A">✓ matches revenue above</span>':'<span style="color:#F28B82">✗ mismatch — check inputs</span>');
+
+  document.getElementById('formula-note').innerHTML=
+    `<strong style="color:#9ABFCF">Revenue formula</strong><br>`+
+    `${farms} farms × ${acres} ac × ₹${rate} × ${days} days = <strong style="color:#56B4D3">${fmt(rev,true)}</strong><br>`+
+    `100-unit batch cost = ${fmt(build*0.70,true)} (30% off)`;
+
+  document.getElementById('bottom-note').textContent=
+    `Revenue = acres/day (${acresDay}) × ₹${rate}/spray × ${days} days. Sprays per season is used only in the farmer sanity check — not in the fleet revenue formula.`;
+}
+
+function setMode(mode,e){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  if(e)e.target.classList.add('active');
+  document.getElementById('block-direct').classList.toggle('hidden',mode==='raas');
+  document.getElementById('block-raas').classList.toggle('hidden',mode==='direct');
+}
+calc();
+</script>
+</body>
+</html>
