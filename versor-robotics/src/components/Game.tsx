@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Sprout } from "lucide-react";
+import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Droplets, Sprout } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Chapter from "./Chapter";
 import styles from "./Game.module.css";
@@ -24,7 +24,9 @@ export default function Game() {
   const bestRef = useRef<HTMLSpanElement>(null);
   const seedsRef = useRef<HTMLSpanElement>(null);
   const speedRef = useRef<HTMLSpanElement>(null);
-  const hudRef = useRef<Hud>({ score: 0, best: 0, speed: 0, seeds: 0 });
+  const tankRef = useRef<HTMLSpanElement>(null);
+  const tankStatRef = useRef<HTMLDivElement>(null);
+  const hudRef = useRef<Hud>({ score: 0, best: 0, speed: 0, seeds: 0, tank: 1, dry: false });
   const [phase, setPhase] = useState<Phase>("ready");
   const [coarse, setCoarse] = useState(false);
   const [result, setResult] = useState({ score: 0, best: 0, fresh: false });
@@ -50,6 +52,8 @@ export default function Game() {
         if (bestRef.current) bestRef.current.textContent = pad(h.best);
         if (seedsRef.current) seedsRef.current.textContent = String(h.seeds);
         if (speedRef.current) speedRef.current.style.width = `${Math.round(8 + h.speed * 92)}%`;
+        if (tankRef.current) tankRef.current.style.width = `${Math.round(h.tank * 100)}%`;
+        tankStatRef.current?.toggleAttribute("data-dry", h.dry);
       },
     });
     prevBest = hudRef.current.best;
@@ -129,6 +133,11 @@ export default function Game() {
           e.preventDefault();
           game.setBoost(-1);
           break;
+        case " ":
+        case "j":
+          e.preventDefault(); // Space would scroll the page
+          if (!e.repeat) game.setSpray(true);
+          break;
         case "p":
         case "escape":
           game.pause();
@@ -138,9 +147,11 @@ export default function Game() {
     const onKeyUp = (e: KeyboardEvent) => {
       const k = e.key.toLowerCase();
       if (k === "arrowright" || k === "d" || k === "arrowleft" || k === "a") game.setBoost(0);
+      if (k === " " || k === "j") game.setSpray(false);
     };
     const onBlur = () => {
       game.setBoost(0);
+      game.setSpray(false);
       game.pause();
     };
     window.addEventListener("keydown", onKeyDown);
@@ -183,6 +194,7 @@ export default function Game() {
   const go = () => gameRef.current?.primary();
   const hold = (b: -1 | 0 | 1) => () => gameRef.current?.setBoost(b);
   const lane = (d: -1 | 1) => () => gameRef.current?.changeLane(d);
+  const spray = (on: boolean) => () => gameRef.current?.setSpray(on);
 
   return (
     <Chapter id="play" label={tn("play")} prev={C.ink} bg={C.steel} dot="rgba(0,0,0,0.08)">
@@ -225,6 +237,14 @@ export default function Game() {
                 <span ref={seedsRef} className={styles.value} lang="en">
                   0
                 </span>
+              </div>
+              <div ref={tankStatRef} className={`${styles.stat} ${styles.tank}`}>
+                <span className={styles.label}>
+                  <Droplets size={13} aria-hidden="true" /> {t("tank")}
+                </span>
+                <i className={styles.tankBar}>
+                  <span ref={tankRef} />
+                </i>
               </div>
               <div className={`${styles.stat} ${styles.right}`}>
                 <span className={styles.label}>{t("best")}</span>
@@ -279,7 +299,7 @@ export default function Game() {
           </div>
 
           {/* on-screen controls for touch devices */}
-          <div className={styles.touch} aria-hidden="true">
+          <div className={styles.touch} aria-hidden="true" onContextMenu={(e) => e.preventDefault()}>
             <div>
               <button type="button" onPointerDown={lane(-1)} tabIndex={-1}>
                 <ArrowUp size={20} />
@@ -291,6 +311,18 @@ export default function Game() {
               </button>
             </div>
             <div>
+              <button
+                type="button"
+                className={styles.spray}
+                onPointerDown={spray(true)}
+                onPointerUp={spray(false)}
+                onPointerLeave={spray(false)}
+                onPointerCancel={spray(false)}
+                tabIndex={-1}
+              >
+                <Droplets size={20} />
+                <span>{t("touchSpray")}</span>
+              </button>
               <button type="button" onPointerDown={hold(-1)} onPointerUp={hold(0)} onPointerLeave={hold(0)} onPointerCancel={hold(0)} tabIndex={-1}>
                 <ArrowLeft size={20} />
                 <span>{t("touchBrake")}</span>
@@ -318,6 +350,10 @@ export default function Game() {
             <li>
               <kbd lang="en">A</kbd>
               <kbd lang="en">&larr;</kbd> {t("keyBrake")}
+            </li>
+            <li>
+              <kbd className={styles.wide} lang="en">Space</kbd>
+              <kbd lang="en">J</kbd> {t("keySpray")}
             </li>
             <li>
               <kbd className={styles.wide} lang="en">Enter</kbd> {t("keyRestart")}

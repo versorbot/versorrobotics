@@ -3,6 +3,9 @@ import { C } from "./palette";
 /**
  * FIELD RUN: a tiny landscape lane-runner. Drive the Versor rover down the crop rows, change lanes to
  * dodge weeds, rocks, stumps and hay bales, scoop up seeds. Hit anything and you crash.
+ * Hold spray to fire the mast forward along your lane: weeds wilt (+points), the crop rows beside the lane
+ * get a smaller bonus, and rocks, stumps and bales just get wet. The tank drains while spraying and
+ * refills slowly; run it dry and it has to refill a good way before it fires again.
  * Pure canvas 2D, smooth vector drawing (no pixel art).
  */
 
@@ -13,6 +16,10 @@ export interface Hud {
   /** 0..1 how fast we are going (for the speed bar) */
   speed: number;
   seeds: number;
+  /** 0..1 spray left in the tank */
+  tank: number;
+  /** the tank ran dry and is refilling: no spraying until it is back to TANK_READY */
+  dry: boolean;
 }
 export interface Callbacks {
   onPhase(p: Phase): void;
@@ -28,10 +35,10 @@ const BEST_KEY = "versor-field-run-best";
 const PX_PER_M = 30;
 
 type ObKind = "weed" | "rock" | "stump" | "bale";
-type Ob = { kind: ObKind; lane: number; x: number; w: number; seed: number };
+type Ob = { kind: ObKind; lane: number; x: number; w: number; seed: number; wet: number; dead?: number };
 type Pick = { kind: "seed" | "gold"; lane: number; x: number; ph: number };
 type Part = {
-  kind: "mist" | "dust" | "smoke" | "spark" | "text";
+  kind: "mist" | "dust" | "smoke" | "spark" | "text" | "leaf" | "drop";
   x: number;
   y: number;
   vx: number;
@@ -44,6 +51,20 @@ type Part = {
 };
 
 const OB_W: Record<ObKind, number> = { weed: 52, rock: 68, stump: 52, bale: 80 };
+
+// spraying (distances in logical px, ahead of the mast)
+const SPRAY_RANGE = 236; // how far the spray reaches
+const SPRAY_NEAR = 60; // where it starts landing
+const WEED_HP = 0.1; // seconds of spray that wilt a weed
+const WEED_PTS = 25;
+const CROP_PTS = 2;
+const DRAIN = 0.5; // tank per second while spraying (2 s from full)
+const REFILL = 0.16; // tank per second while refilling (about 6 s from empty)
+const REFILL_DELAY = 0.5; // s after letting go before it starts refilling
+const TANK_READY = 0.3; // after running dry, it must refill to this before it fires again
+const MIN_BURST = 0.15; // a tap still fires this long
+const DEAD_TTL = 0.4; // s a wilting weed stays on screen
+const SPROUT_SP = 58; // crop sprout spacing along a row
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
 const rnd = (a: number, b: number) => a + Math.random() * (b - a);
 
@@ -68,13 +89,23 @@ export class FieldRun {
   private picks: Pick[] = [];
   private parts: Part[] = [];
   private lastSpawn = 0;
-  private emit = { mist: 0, dust: 0 };
+  private emit = { mist: 0, dust: 0, spray: 0 };
 
   private meters = 0;
   private bonus = 0;
   private seeds = 0;
   private best = 0;
   private hudT = 0;
+
+  private sprayHeld = false; // key / button down
+  private sprayMin = 0; // what is left of a tap's minimum burst
+  private spraying = false; // actually firing this frame
+  private tank = 1;
+  private dry = false;
+  private sinceSpray = 99; // s since it last fired
+  private reach = 0; // current length of the spray (px ahead of the mast), eased
+  private sprayBlocked = false; // the spray is hitting a rock / stump / bale
+  private treated = new Set<number>(); // crop sprouts already sprayed: n * 8 + row
 
   private shake = 0;
   private crashAge = 0;
@@ -115,7 +146,9 @@ export class FieldRun {
     this.setPhase("playing");
   }
   pause() {
-    if (this.phase === "playing") this.setPhase("paused");
+    if (this.phase !== "playing") return;
+    this.stopSpray();
+    this.setPhase("paused");
   }
   changeLane(d: -1 | 1) {
     if (this.phase !== "playing") return;
@@ -123,6 +156,23 @@ export class FieldRun {
   }
   setBoost(b: -1 | 0 | 1) {
     this.boost = b;
+  }
+  /** Space / J / the Spray button: true while held */
+  setSpray(on: boolean) {
+    if (!on) {
+      this.sprayHeld = false;
+      return;
+    }
+    if (this.phase !== "playing" || this.sprayHeld) return;
+    this.sprayHeld = true;
+    if (!this.dry && this.tank > 0) this.sprayMin = MIN_BURST;
+  }
+  private stopSpray() {
+    this.sprayHeld = false;
+    this.sprayMin = 0;
+    this.spraying = false;
+    this.reach = 0;
+    this.sprayBlocked = false;
   }
 
   private setPhase(p: Phase) {
@@ -148,6 +198,11 @@ export class FieldRun {
     this.seeds = 0;
     this.shake = 0;
     this.crashAge = 0;
+    this.stopSpray();
+    this.tank = 1;
+    this.dry = false;
+    this.sinceSpray = 99;
+    this.treated.clear();
     this.pushHud();
   }
 
@@ -156,7 +211,14 @@ export class FieldRun {
   }
 
   private pushHud() {
-    this.cb.onHud({ score: this.score, best: this.best, speed: clamp((this.speed - 300) / 560, 0, 1), seeds: this.seeds });
+    this.cb.onHud({
+      score: this.score,
+      best: this.best,
+      speed: clamp((this.speed - 300) / 560, 0, 1),
+      seeds: this.seeds,
+      tank: this.tank,
+      dry: this.dry,
+    });
   }
 
   // ── update ──
@@ -206,13 +268,19 @@ export class FieldRun {
       }
 
       // move + collide
-      for (const o of this.obs) o.x -= this.speed * dt;
+      for (const o of this.obs) {
+        o.x -= this.speed * dt;
+        if (o.dead !== undefined) o.dead += dt;
+      }
       for (const p of this.picks) p.x -= this.speed * dt;
-      this.obs = this.obs.filter((o) => o.x > -120);
+      this.obs = this.obs.filter((o) => o.x > -120 && (o.dead === undefined || o.dead < DEAD_TTL));
       this.picks = this.picks.filter((p) => p.x > -60);
+
+      this.updateSpray(dt);
 
       const ry = this.roverY();
       for (const o of this.obs) {
+        if (o.dead !== undefined) continue; // a wilting weed is harmless
         if (Math.abs(o.lane - this.laneF) < 0.5 && Math.abs(o.x - ROVER_X) < o.w / 2 + 38) {
           this.crash(o.x, ry);
           break;
@@ -279,7 +347,8 @@ export class FieldRun {
         this.parts.splice(i, 1);
         continue;
       }
-      if (q.kind === "spark") q.vy += 520 * dt;
+      if (q.kind === "spark" || q.kind === "leaf" || q.kind === "drop") q.vy += 520 * dt;
+      if (q.kind === "leaf" && q.rot !== undefined) q.rot += q.vx * 0.02 * dt;
       if (q.kind === "mist") q.vy += 110 * dt;
       if (q.kind === "smoke") q.vy -= 20 * dt;
       q.x += q.vx * dt;
@@ -303,7 +372,7 @@ export class FieldRun {
     const x0 = GAME_W + 90;
     for (let i = 0; i < n; i++) {
       const kind = kinds[(Math.random() * kinds.length) | 0];
-      this.obs.push({ kind, lane: lanes[i], x: x0 + rnd(0, 36), w: OB_W[kind], seed: Math.random() * 100 });
+      this.obs.push({ kind, lane: lanes[i], x: x0 + rnd(0, 36), w: OB_W[kind], seed: Math.random() * 100, wet: 0 });
     }
     // something to collect in a lane left clear
     if (Math.random() < 0.78) {
@@ -316,7 +385,105 @@ export class FieldRun {
     }
   }
 
+  /** Tank, reach and what the spray hits this frame (only called while playing). */
+  private updateSpray(dt: number) {
+    if (this.dry && this.tank >= TANK_READY) this.dry = false;
+    const want = this.sprayHeld || this.sprayMin > 0;
+    this.spraying = want && !this.dry && this.tank > 0;
+    if (this.spraying) {
+      this.tank = Math.max(0, this.tank - DRAIN * dt);
+      this.sprayMin = Math.max(0, this.sprayMin - dt);
+      this.sinceSpray = 0;
+      if (this.tank <= 0) {
+        // ran dry: the nozzles cough and stop until the tank is back to TANK_READY
+        this.dry = true;
+        this.sprayMin = 0;
+        this.spraying = false;
+        const ny = this.roverY() - 74 * this.laneScale(this.laneF);
+        for (let i = 0; i < 6; i++) this.dropAt(ROVER_X + 6, ny, rnd(-40, 80), rnd(-120, -20));
+      }
+    } else {
+      this.sprayMin = 0;
+      this.sinceSpray += dt;
+      if (this.sinceSpray >= REFILL_DELAY) this.tank = Math.min(1, this.tank + REFILL * dt);
+    }
+
+    // the spray reaches its full range, or the first rock / stump / bale in the lane
+    let limit = SPRAY_RANGE;
+    for (const o of this.obs) {
+      if (o.kind === "weed" || Math.abs(o.lane - this.laneF) >= 0.5) continue;
+      const face = o.x - o.w * 0.45 - ROVER_X;
+      if (face > 40 && face < limit) limit = face;
+    }
+    const target = this.spraying ? limit : 0;
+    this.reach += (target - this.reach) * (1 - Math.exp(-dt * (this.spraying ? 16 : 24)));
+    if (this.reach > limit) this.reach = limit; // water does not go through rock
+    if (!this.spraying && this.reach < 2) this.reach = 0;
+    this.sprayBlocked = this.spraying && limit < SPRAY_RANGE && this.reach >= limit - 4;
+    if (!this.spraying || this.reach < SPRAY_NEAR) return;
+
+    const gy = this.roverY();
+    const k = this.laneScale(this.laneF);
+    const far = ROVER_X + this.reach;
+
+    // weeds in the lane wilt
+    for (const o of this.obs) {
+      if (o.kind !== "weed" || o.dead !== undefined || Math.abs(o.lane - this.laneF) >= 0.5) continue;
+      if (o.x - o.w * 0.4 > far || o.x < ROVER_X + 40) continue;
+      o.wet += dt;
+      if (o.wet >= WEED_HP) this.killWeed(o);
+    }
+
+    // the crop sprouts on both sides of the lane: a small bonus, once each
+    const lane = Math.round(this.laneF);
+    for (const j of [lane, lane + 1]) {
+      const off = (j % 2) * 29;
+      const rowY = LANE_Y[0] - 6 + j * 72 + 11 * (0.84 + j * 0.07) - 1;
+      const n0 = Math.ceil((this.dist + ROVER_X + SPRAY_NEAR - off) / SPROUT_SP);
+      const n1 = Math.floor((this.dist + far - off) / SPROUT_SP);
+      for (let n = n0; n <= n1; n++) {
+        const key = n * 8 + j;
+        if (this.treated.has(key)) continue;
+        this.treated.add(key);
+        this.bonus += CROP_PTS;
+        const x = n * SPROUT_SP + off - this.dist;
+        for (let i = 0; i < 2; i++) this.dropAt(x, rowY - 14, rnd(-50, 50), rnd(-110, -40));
+      }
+    }
+    if (this.treated.size > 160) {
+      for (const key of this.treated) if (Math.floor(key / 8) * SPROUT_SP + 29 - this.dist < -80) this.treated.delete(key);
+    }
+
+    // splash where it lands, and off a rock face
+    this.emit.spray += dt * 70;
+    while (this.emit.spray >= 1) {
+      this.emit.spray -= 1;
+      const x = rnd(ROVER_X + Math.min(this.reach, 100 * k), far);
+      this.parts.push({ kind: "mist", x, y: gy - rnd(0, 6) * k, vx: -this.speed * 0.25 + rnd(-40, 40), vy: rnd(-60, -15), age: 0, ttl: rnd(0.25, 0.5), r: rnd(1.4, 3.2) });
+    }
+    if (this.sprayBlocked && Math.random() < dt * 40) this.dropAt(far - 4, gy - rnd(8, 40) * k, rnd(-200, -60), rnd(-160, -40));
+  }
+
+  private dropAt(x: number, y: number, vx: number, vy: number) {
+    this.parts.push({ kind: "drop", x, y, vx, vy, age: 0, ttl: rnd(0.3, 0.55), r: rnd(1.4, 2.4) });
+  }
+
+  private killWeed(o: Ob) {
+    o.dead = 0;
+    this.bonus += WEED_PTS;
+    const k = this.laneScale(o.lane);
+    const y = LANE_Y[o.lane] + 30;
+    this.parts.push({ kind: "text", x: o.x, y: y - 76 * k, vx: 0, vy: -70, age: 0, ttl: 0.8, r: 0, text: "+" + WEED_PTS });
+    for (let i = 0; i < 12; i++) {
+      const a = rnd(-Math.PI * 0.95, -Math.PI * 0.05);
+      const sp = rnd(90, 260);
+      this.parts.push({ kind: "leaf", x: o.x + rnd(-14, 14), y: y - rnd(10, 50) * k, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, age: 0, ttl: rnd(0.45, 0.8), r: rnd(3, 6), rot: rnd(0, Math.PI) });
+    }
+    for (let i = 0; i < 8; i++) this.dropAt(o.x + rnd(-20, 20), y - rnd(20, 60) * k, rnd(-120, 120), rnd(-200, -60));
+  }
+
   private crash(x: number, y: number) {
+    this.stopSpray();
     this.crashAt = { x: Math.min(x, ROVER_X + 60), y };
     this.crashAge = 0;
     this.shake = 1;
@@ -363,7 +530,10 @@ export class FieldRun {
       const gy = LANE_Y[l] + 30;
       for (const p of this.picks) if (p.lane === l) this.drawPickup(p, gy, k);
       for (const o of this.obs) if (o.lane === l) this.drawOb(o, gy, k);
-      if (l === roverLane) this.drawRover();
+      if (l === roverLane) {
+        this.drawRover();
+        this.drawSpray();
+      }
     }
 
     this.drawParts();
@@ -568,25 +738,28 @@ export class FieldRun {
       ctx.fillRect(0, by - h / 2, GAME_W, h);
       ctx.fillStyle = "rgba(10,30,20,0.25)";
       ctx.fillRect(0, by + h / 2 - 3, GAME_W, 3);
-      const sp = 58;
+      const sp = SPROUT_SP;
       const o = this.dist % sp;
-      for (let x = -o - sp; x < GAME_W + sp; x += sp) {
-        this.sprout(x + (j % 2) * 29, by + h / 2 - 1, depth);
+      let n = Math.floor(this.dist / sp) - 1; // world index of the first sprout drawn
+      for (let x = -o - sp; x < GAME_W + sp; x += sp, n++) {
+        this.sprout(x + (j % 2) * 29, by + h / 2 - 1, depth, this.treated.has(n * 8 + j));
       }
     }
   }
 
-  private sprout(x: number, y: number, s: number) {
+  /** a crop sprout; once sprayed it perks up, a brighter green with a bead of water on each leaf */
+  private sprout(x: number, y: number, s: number, wet = false) {
     const { ctx } = this;
     ctx.lineJoin = "round";
     ctx.lineCap = "round";
     ctx.strokeStyle = "#1c3a26";
     ctx.lineWidth = 1.4;
-    ctx.fillStyle = "#8cc15f";
+    ctx.fillStyle = wet ? "#a9dc6f" : "#8cc15f";
+    const up = wet ? 1.12 : 1;
     for (const d of [-1, 1]) {
       ctx.beginPath();
       ctx.moveTo(x, y - 9 * s);
-      ctx.quadraticCurveTo(x + d * 12 * s, y - 20 * s, x + d * 15 * s, y - 11 * s);
+      ctx.quadraticCurveTo(x + d * 12 * s, y - 20 * s * up, x + d * 15 * s, y - 11 * s * up);
       ctx.quadraticCurveTo(x + d * 6 * s, y - 8 * s, x, y - 9 * s);
       ctx.fill();
       ctx.stroke();
@@ -595,6 +768,14 @@ export class FieldRun {
     ctx.moveTo(x, y);
     ctx.lineTo(x, y - 12 * s);
     ctx.stroke();
+    if (wet) {
+      ctx.fillStyle = "rgba(236,248,252,0.95)";
+      for (const d of [-1, 1]) {
+        ctx.beginPath();
+        ctx.arc(x + d * 11 * s, y - 14 * s, 1.7 * s, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
   }
 
   // ── the rover ──
@@ -674,13 +855,24 @@ export class FieldRun {
     dot(97.5, 31, 2.2, C.cream);
     dot(97.5, 38, 2.2, C.cream);
     rr(11, 27, 4, 6, 1.5, "#ff6a45", 1.6);
-    // spray mast with five nozzles
+    // spray mast with five nozzles; the top one fires forward when spraying
     rr(53, 22, 14, 5, 2, ink);
     rr(53, 43, 14, 5, 2, ink);
     rr(56.5, 9, 7, 52, 3.5, C.steel, 2.4);
+    const firing = this.phase === "playing" && this.reach > 2;
     for (const cy of [14, 24.5, 35, 45.5, 56]) {
       dot(60, cy, 3.8, C.amber, 1.8);
       dot(60, cy, 1.2, ink);
+    }
+    if (firing) {
+      // nozzle head turned forward, glowing water-white, with a pulsing pressure ring
+      rr(61, 10.5, 9, 7, 2.5, C.steel, 2);
+      dot(70, 14, 3.6, "#eaf8fc", 1.8);
+      ctx.strokeStyle = `rgba(234,248,252,${0.55 + 0.35 * Math.sin(this.time * 38)})`;
+      ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      ctx.arc(70, 14, 6 + Math.sin(this.time * 38) * 1.4, -Math.PI / 2, Math.PI / 2);
+      ctx.stroke();
     }
     // near wheels, spinning
     for (const cx of [36, 86]) {
@@ -703,6 +895,93 @@ export class FieldRun {
     ctx.restore();
   }
 
+  // ── the spray ──
+  /** A forward fan from the top mast nozzle, arcing over the hood and landing on the lane ahead. */
+  private drawSpray() {
+    if (this.phase !== "playing" || this.reach < 6) return;
+    const { ctx } = this;
+    const k = this.laneScale(this.laneF);
+    const S = k * 1.3; // rover drawing scale
+    const gy = this.roverY();
+    const nx = ROVER_X + 10 * S; // nozzle tip (rover-local x 70, y 14)
+    const ny = gy + (14 - 71.5) * S;
+    const far = ROVER_X + this.reach;
+    const land = ROVER_X + Math.min(this.reach - 2, 74 * S); // nearest point it lands
+    const a = clamp(this.reach / 70, 0, 1); // fades in as the jet shoots out
+    const t = this.time;
+
+    ctx.save();
+    ctx.lineJoin = "round";
+    ctx.lineCap = "round";
+
+    // wet patch on the lane where it lands
+    ctx.fillStyle = `rgba(32,60,72,${0.22 * a})`;
+    ctx.beginPath();
+    ctx.ellipse((land + far) / 2, gy - 1, Math.max(4, (far - land) / 2), 6 * k, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // the fan: upper edge arcs forward, lower edge clears the hood and drops just past the bumper
+    const upper = (u: number) => {
+      const cx = nx + (far - nx) * 0.45;
+      const cy = ny - 20 * S;
+      const m = 1 - u;
+      return [m * m * nx + 2 * m * u * cx + u * u * far, m * m * (ny - 1.5 * S) + 2 * m * u * cy + u * u * (gy - 4 * k)];
+    };
+    const g = ctx.createLinearGradient(nx, 0, far, 0);
+    g.addColorStop(0, `rgba(240,250,253,${0.85 * a})`);
+    g.addColorStop(0.5, `rgba(220,240,247,${0.45 * a})`);
+    g.addColorStop(1, `rgba(220,240,247,${0.16 * a})`);
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.moveTo(nx, ny - 1.5 * S);
+    ctx.quadraticCurveTo(nx + (far - nx) * 0.45, ny - 20 * S, far, gy - 4 * k);
+    ctx.quadraticCurveTo(far + 6 * k, gy, far - 4 * k, gy + 2 * k);
+    ctx.lineTo(land, gy + 2 * k);
+    ctx.quadraticCurveTo(nx + 46 * S, ny - 6 * S, nx, ny + 1.5 * S);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = `rgba(30,70,84,${0.18 * a})`;
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    // streams racing along it
+    ctx.setLineDash([10, 16]);
+    for (let i = 0; i < 4; i++) {
+      const v = (i + 0.5) / 4;
+      const ex = land + (far - land) * v;
+      ctx.lineDashOffset = -(t * 520 + i * 13);
+      ctx.strokeStyle = `rgba(255,255,255,${(0.75 - i * 0.1) * a})`;
+      ctx.lineWidth = 1.6 - i * 0.2;
+      ctx.beginPath();
+      ctx.moveTo(nx, ny);
+      ctx.quadraticCurveTo(nx + (ex - nx) * 0.5, ny - (16 - i * 3) * S, ex, gy - 2 * k);
+      ctx.stroke();
+    }
+    ctx.setLineDash([]);
+
+    // a bright core leaving the nozzle
+    const [c1x, c1y] = upper(0.18);
+    ctx.strokeStyle = `rgba(255,255,255,${0.9 * a})`;
+    ctx.lineWidth = 2.4 * S * 0.6;
+    ctx.beginPath();
+    ctx.moveTo(nx, ny);
+    ctx.lineTo(c1x, c1y + 3 * S);
+    ctx.stroke();
+
+    // spray bouncing off a rock / stump / bale face
+    if (this.sprayBlocked) {
+      const r = 10 + Math.sin(t * 30) * 2;
+      const sg = ctx.createRadialGradient(far, gy - 20 * k, 0, far, gy - 20 * k, r * 2.2);
+      sg.addColorStop(0, `rgba(240,250,253,${0.7 * a})`);
+      sg.addColorStop(1, "rgba(240,250,253,0)");
+      ctx.fillStyle = sg;
+      ctx.beginPath();
+      ctx.arc(far, gy - 20 * k, r * 2.2, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
   // ── obstacles ──
   private drawOb(o: Ob, gy: number, k: number) {
     const { ctx } = this;
@@ -721,6 +1000,12 @@ export class FieldRun {
 
     if (o.kind === "weed") {
       const sway = Math.sin(this.time * 3 + o.seed) * 2.2;
+      // a sprayed weed browns, slumps and fades
+      const d = o.dead === undefined ? 0 : clamp(o.dead / DEAD_TTL, 0, 1);
+      if (d > 0) {
+        ctx.globalAlpha = 1 - d * d;
+        ctx.scale(1 + d * 0.25, 1 - d * 0.8);
+      }
       ctx.lineWidth = 2;
       const blades = [
         [-20, -34, "#5f8244"],
@@ -731,7 +1016,7 @@ export class FieldRun {
         [21, -32, "#7a9e5a"],
       ] as const;
       for (const [bx, h, col] of blades) {
-        ctx.fillStyle = col;
+        ctx.fillStyle = d > 0 ? "#9c8a45" : col;
         ctx.beginPath();
         ctx.moveTo(bx * 0.35 - 4, 0);
         ctx.quadraticCurveTo(bx * 0.8 - 3 + sway * 0.3, h * 0.55, bx + sway, h);
@@ -923,6 +1208,26 @@ export class FieldRun {
         ctx.beginPath();
         ctx.arc(q.x, q.y, q.r * a + 0.4, 0, Math.PI * 2);
         ctx.fill();
+      } else if (q.kind === "leaf") {
+        ctx.save();
+        ctx.translate(q.x, q.y);
+        ctx.rotate(q.rot ?? 0);
+        ctx.fillStyle = `rgba(122,158,90,${a})`;
+        ctx.strokeStyle = `rgba(19,31,29,${0.7 * a})`;
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.ellipse(0, 0, q.r * 1.5, q.r * 0.6, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        ctx.restore();
+      } else if (q.kind === "drop") {
+        ctx.fillStyle = `rgba(236,248,252,${0.9 * a})`;
+        ctx.strokeStyle = `rgba(30,70,84,${0.45 * a})`;
+        ctx.lineWidth = 0.8;
+        ctx.beginPath();
+        ctx.arc(q.x, q.y, q.r, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
       } else if (q.kind === "text" && q.text) {
         ctx.save();
         ctx.font = `900 24px ${this.font}`;

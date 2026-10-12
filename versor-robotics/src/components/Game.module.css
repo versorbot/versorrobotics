@@ -115,6 +115,35 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* spray tank: water-blue bar, red and blinking while it refills after running dry */
+.tankBar {
+  display: block;
+  width: clamp(48px, 8vw, 96px);
+  height: 8px;
+  margin-top: 6px;
+  border-radius: 4px;
+  background: rgba(243, 233, 216, 0.18);
+  overflow: hidden;
+}
+
+.tankBar span {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 4px;
+  background: linear-gradient(90deg, #4a7c8c, #9fd3e0);
+  transition: width 0.12s linear;
+}
+
+.tank[data-dry] .label {
+  color: var(--tomato);
+}
+
+.tank[data-dry] .tankBar span {
+  background: var(--tomato);
+  animation: blink 0.5s steps(2, jump-none) infinite;
+}
+
 .speed {
   position: absolute;
   left: 12px;
@@ -319,6 +348,13 @@
     border-radius: 12px;
     box-shadow: 0 4px 0 #9d9484;
     touch-action: none;
+    -webkit-touch-callout: none;
+    user-select: none;
+  }
+
+  .touch button.spray {
+    min-width: 66px;
+    background: #9fd3e0;
   }
 
   .touch button:active {
@@ -367,6 +403,11 @@
     display: none;
   }
 
+  .tankBar {
+    width: 40px;
+    margin-top: 4px;
+  }
+
   .card {
     padding: 10px 16px 12px;
     gap: 3px;
@@ -385,6 +426,36 @@
     margin-top: 6px;
     padding: 9px 12px;
     font-size: 10px;
+  }
+}
+
+/* narrow phones held upright: the five buttons share the width, each as wide as its label needs
+   (Tamil and Malayalam labels are much longer than "Up"), and labels never break mid-word */
+@media (pointer: coarse) and (max-width: 400px) {
+  .touch {
+    gap: 10px;
+  }
+
+  .touch > div {
+    flex: 1 1 auto;
+    min-width: 0;
+    gap: 5px;
+  }
+
+  .touch button,
+  .touch button.spray {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding: 0 4px;
+    font-size: 9px;
+    letter-spacing: 0.02em;
+  }
+
+  .touch button span {
+    max-width: 100%;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
   }
 }
 
@@ -427,7 +498,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .card button {
+  .card button,
+  .tank[data-dry] .tankBar span {
     animation: none;
   }
 }
