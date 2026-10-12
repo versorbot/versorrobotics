@@ -1,12 +1,13 @@
 "use client";
 
 import { useEffect } from "react";
-import { WASH_SPAN, WASH_TOP, clamp } from "@/lib/wash";
+import { WASH_SPAN, WASH_TOP, clamp, readViewport } from "@/lib/wash";
 
 /**
  * Makes in-page links (#vision, #contact …) glide instead of jumping, and paces the glide around the spray wash:
- * quick between sections, then slowing down so the wash of the section you asked for plays out in about a second
- * and a half. Any wheel / touch / key press hands control straight back to the visitor.
+ * quick between sections, then slowing down so the wash that reveals the section you asked for plays out in about
+ * a second and a half. Going down that is the section's own wash; going back up it is the (mirrored) wash of the
+ * section after it. Any wheel / touch / key press hands control straight back to the visitor.
  */
 export default function SmoothAnchors() {
   useEffect(() => {
@@ -15,8 +16,9 @@ export default function SmoothAnchors() {
 
     const glide = (y1: number, dest: Element | null) => {
       stop?.();
-      const vh = window.innerHeight;
-      y1 = clamp(y1, 0, Math.max(0, document.documentElement.scrollHeight - vh));
+      const vh = readViewport().svh; // the same stable height the wash is measured in
+      // the furthest the page can scroll right now (real viewport, not the stable one)
+      y1 = clamp(y1, 0, Math.max(0, document.documentElement.scrollHeight - window.innerHeight));
       let y = window.scrollY;
       if (Math.abs(y1 - y) < 2) return;
       if (reduce.matches) {
@@ -28,10 +30,12 @@ export default function SmoothAnchors() {
       const lo = Math.min(y, y1);
       const hi = Math.max(y, y1);
       // where each wash plays, in page coordinates
-      const zones = Array.from(document.querySelectorAll<HTMLElement>("[data-chapter]"))
+      const chapters = Array.from(document.querySelectorAll<HTMLElement>("[data-chapter]"));
+      const reveals = dest ? chapters[chapters.indexOf(dest as HTMLElement) + (dir > 0 ? 0 : 1)] : undefined;
+      const zones = chapters
         .map((el) => {
           const a = el.getBoundingClientRect().top + window.scrollY - vh * WASH_TOP;
-          return { a, b: a + vh * WASH_SPAN, dest: el === dest };
+          return { a, b: a + vh * WASH_SPAN, dest: el === reveals };
         })
         .filter((z) => z.b > lo && z.a < hi);
 
@@ -79,6 +83,11 @@ export default function SmoothAnchors() {
         v = target > v ? Math.min(target, v + ACC * dt) : Math.max(target, v - DEC * 1.4 * dt);
         y += dir * Math.min(v * dt, rem);
         window.scrollTo({ top: y, behavior: "instant" });
+        // the page would not go there (it got shorter, or something else moved it): stop rather than spin
+        if (Math.abs(window.scrollY - y) > 2) {
+          end(false);
+          return;
+        }
         raf = requestAnimationFrame(step);
       };
       raf = requestAnimationFrame(step);

@@ -3,7 +3,10 @@
 }
 
 /* The track holds the stage plus a runway: 70svh of scrolling during which the stage stays stuck.
-   (The runway must be in the track's content box. Padding would not let a sticky child move.) */
+   (The runway must be in the track's content box. Padding would not let a sticky child move.)
+   The wash is measured in svh, which stays put while a mobile browser's toolbars slide in and out; the stage
+   paints the large viewport (lvh) so no strip of page shows under it when they slide away, and keeps its content
+   centred in the small one. */
 .track {
   position: relative;
 }
@@ -17,7 +20,7 @@
   position: sticky;
   top: 0;
   min-height: 100vh;
-  min-height: 100svh;
+  min-height: 100lvh;
   background: var(--prev);
   isolation: isolate;
 }
@@ -36,8 +39,9 @@
   flex-direction: column;
   justify-content: center;
   min-height: 100vh;
-  min-height: 100svh;
+  min-height: 100lvh;
   padding: calc(var(--header-h) + clamp(32px, 6vh, 72px)) 0 clamp(56px, 9vh, 96px);
+  padding-bottom: calc(clamp(56px, 9vh, 96px) + 100lvh - 100svh);
   background: var(--bg);
   color: var(--fg);
   overflow: clip;
@@ -49,6 +53,7 @@
   .next {
     padding-top: calc(var(--header-h) + 10px);
     padding-bottom: 20px;
+    padding-bottom: calc(20px + 100lvh - 100svh);
   }
 }
 
@@ -71,7 +76,7 @@
   top: 0;
   left: 0;
   width: 100%;
-  height: 100vh;
+  height: 100vh; /* replaced by the measured height in px */
   z-index: 3;
   pointer-events: none;
 }
