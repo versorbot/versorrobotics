@@ -6,7 +6,7 @@ import styles from "./Contact.module.css";
 import { kicker, rich } from "@/i18n/rich";
 import type { Locale } from "@/i18n/routing";
 import { C } from "@/lib/palette";
-import { products, site } from "@/lib/site";
+import { contact, products } from "@/lib/site";
 
 const INTERESTS = [...products.map((p) => p.id), "both", "other"] as const;
 
@@ -53,18 +53,18 @@ export default async function Contact() {
 
         <div className={styles.grid}>
           <div className={styles.info}>
-            <a href={`mailto:${site.email}`} className={styles.chip}>
+            <a href={contact.email.href} className={styles.chip}>
               <Mail size={20} aria-hidden="true" />
-              {site.email}
+              {contact.email.label}
             </a>
-            <a href={`tel:${site.phone.replace(/[^+\d]/g, "")}`} className={styles.chip}>
+            <a href={contact.phone.href} className={styles.chip}>
               <Phone size={20} aria-hidden="true" />
-              {site.phone}
+              {contact.phone.label}
             </a>
-            <p className={styles.chip}>
+            <a href={contact.location.href} target="_blank" rel="noopener noreferrer" className={styles.chip}>
               <MapPin size={20} aria-hidden="true" />
-              {site.address}
-            </p>
+              {contact.location.label}
+            </a>
             <aside className={styles.note}>
               <p className={styles.noteTitle}>{t("noteTitle")}</p>
               <p>{t("noteText")}</p>

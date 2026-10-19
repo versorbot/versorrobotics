@@ -8,9 +8,6 @@
 interface SiteConfig {
   name: string;
   url: string;
-  email: string;
-  phone: string;
-  address: string;
   video: { src: string; poster: string; youtubeId: string };
   forms: {
     join: { url: string; embedUrl: string };
@@ -29,11 +26,6 @@ export const site: SiteConfig = {
   url:
     process.env.NEXT_PUBLIC_SITE_URL ||
     (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : "http://localhost:3000"),
-
-  // (placeholder) contact details
-  email: "hello@versorrobotics.farm",
-  phone: "+1 (555) 010-4040",
-  address: "Barn 7, Greenfield AgTech Park",
 
   /* ── VIDEO ───────────────────────────────────────────────────
    * Option A (self-hosted): drop your file at  public/videos/versor-demo.mp4
@@ -74,6 +66,13 @@ export const site: SiteConfig = {
   },
 };
 
+/** Contact details: what is shown, and where each one links. */
+export const contact = {
+  phone: { label: "+91 73585 50729", href: "tel:+917358550729" },
+  email: { label: "vidhyasagar@artpark.in", href: "mailto:vidhyasagar@artpark.in" },
+  location: { label: "ARTGARAGE, Jalahalli", href: "https://maps.app.goo.gl/MeJVgti6JbmCGAaBA" },
+} as const;
+
 /**
  * Products. Names and codes stay in Latin script in every language, so they live here.
  * Everything a visitor reads about them (kind, tagline, bullet points) is in messages/<locale>.json under products.items.<id>.
@@ -89,7 +88,7 @@ export const products = [
     id: "spray",
     index: "3.2",
     code: "VR-02",
-    name: "Spray-Runner",
+    name: "The pesticide printer",
   },
 ] as const;
 

@@ -1,4 +1,4 @@
-import { Cpu, Eye, Leaf } from "lucide-react";
+import { Blocks, Leaf, Printer } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Chapter from "./Chapter";
 import Reveal from "./Reveal";
@@ -8,9 +8,9 @@ import { kicker, rich } from "@/i18n/rich";
 import { C } from "@/lib/palette";
 
 const values = [
-  { id: "soil", icon: Leaf },
-  { id: "edge", icon: Cpu },
-  { id: "open", icon: Eye },
+  { id: "leaf", icon: Leaf },
+  { id: "printer", icon: Printer },
+  { id: "platform", icon: Blocks },
 ] as const;
 
 export default function Vision() {

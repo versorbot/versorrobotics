@@ -4,7 +4,7 @@ import { useState, type FormEvent } from "react";
 import { Send } from "lucide-react";
 import { useTranslations } from "next-intl";
 import styles from "./Contact.module.css";
-import { site } from "@/lib/site";
+import { contact, site } from "@/lib/site";
 
 type Status = "idle" | "sending" | "sent" | "mailto" | "error";
 
@@ -47,7 +47,7 @@ export default function ContactForm({ options, english }: { options: { id: strin
       const body = encodeURIComponent(
         `${values.message}\n\n${m.name}: ${values.name}\n${m.email}: ${values.email}\n${m.interest}: ${values.interest}\n${m.language}: ${english.language}`,
       );
-      window.location.href = `mailto:${site.email}?subject=${subject}&body=${body}`;
+      window.location.href = `${contact.email.href}?subject=${subject}&body=${body}`;
       setStatus("mailto");
       return;
     }

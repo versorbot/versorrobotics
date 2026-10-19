@@ -36,22 +36,22 @@
     "repeat": "Repeat"
   },
   "vision": {
-    "title": "Agriculture,<br></br>played on<br></br><ink>easy mode.</ink>",
-    "lede": "Versor Robotics exists to make small farms mighty. We believe the next green revolution is not bigger tractors. It is fleets of tireless, respectful machines that treat every plant as an individual and every field as a living system.",
+    "title": "A print<br></br>head for<br></br><ink>pesticide.</ink>",
+    "lede": "Three machines spray a farm, and none of them can spray a plant. A tractor is wider than the row and cannot get in once the crop is up. A drone's downwash scatters the droplet before it lands. A person can reach anything but cannot spray the same way twice, and labour is scarce.",
     "unitAlt": "Versor rover, unit 07",
     "unitCaption": "Unit-07",
     "values": {
-      "soil": {
-        "title": "Soil first",
-        "text": "Every machine we ship is judged by one metric: healthier soil at season end. No compaction, no blanket chemistry, no waste."
+      "leaf": {
+        "title": "Under the leaf",
+        "text": "The pest lives under the leaf. Every conventional sprayer works from above, so the underside stays dry. From the side, the whole leaf is wetted."
       },
-      "edge": {
-        "title": "Edge intelligence",
-        "text": "Our robots see, decide and act in the field. No cloud round-trips, no dead zones, so a row of crops is handled where it grows."
+      "printer": {
+        "title": "Like a printer",
+        "text": "A printer lays ink only where there is something to print. Our column of nozzles looks sideways at the plant and opens only where there is a leaf. Gaps get nothing."
       },
-      "open": {
-        "title": "Radical transparency",
-        "text": "Open field logs, open repair manuals. A farmer should always know what the robot did last night and why."
+      "platform": {
+        "title": "One platform",
+        "text": "A four-wheeled autonomous robot that works inside grown crop rows, with attachments for logistics, spraying, harvesting and crop monitoring."
       }
     }
   },
@@ -80,11 +80,11 @@
       },
       "spray": {
         "kind": "Spraying robot",
-        "tagline": "A wide boom of precision nozzles that sprays exactly where you tell it, row after row.",
+        "tagline": "A column of nozzles rides down the crop row and sprays each plant from the side, only where there is a leaf.",
         "points": {
-          "1": "Multi-nozzle boom, built for tight rows",
-          "2": "Waypoint and row-following autonomy",
-          "3": "Voice-command ready"
+          "1": "Sprays from the side, under the leaf",
+          "2": "Looks at the plant as it goes",
+          "3": "Fires only at leaves, so gaps get nothing"
         }
       }
     }
@@ -214,9 +214,9 @@
   },
   "simulator": {
     "metaTitle": "Spray simulator | Versor Robotics",
-    "metaDescription": "Try the Spray-Runner's spray rig in your browser: change the mast, nozzles, pump and speed, and see live whether every plant gets sprayed.",
+    "metaDescription": "Try the pesticide printer's spray rig in your browser: change the mast, nozzles, pump and speed, and see live whether every plant gets sprayed.",
     "title": "Spray simulator<dot>.</dot>",
-    "intro": "Play with the Spray-Runner's spray rig: move the mast, switch nozzles on and off, change the pump, speed and crop, and watch live whether every plant gets its dose.",
+    "intro": "Play with the pesticide printer's spray rig: move the mast, switch nozzles on and off, change the pump, speed and crop, and watch live whether every plant gets its dose.",
     "englishNote": "The simulator's own labels and numbers are in English.",
     "loading": "Loading the simulator…",
     "back": "Back to the machines"

@@ -5,14 +5,14 @@ import { SproutIcon } from "./illustrations/Bots";
 import styles from "./JoinUs.module.css";
 import { kicker, rich } from "@/i18n/rich";
 import { C } from "@/lib/palette";
-import { roles, site } from "@/lib/site";
+import { contact, roles, site } from "@/lib/site";
 
 export default function JoinUs() {
   const t = useTranslations("join");
   const tn = useTranslations("nav");
   const { url, embedUrl } = site.forms.join;
   // Until a Google Form link is set, applications fall back to email.
-  const apply = url || `mailto:${site.email}?subject=${encodeURIComponent(t("applySubject"))}`;
+  const apply = url || `${contact.email.href}?subject=${encodeURIComponent(t("applySubject"))}`;
   const external = Boolean(url);
 
   return (
@@ -29,7 +29,7 @@ export default function JoinUs() {
               <a href={apply} className="btn btn--sprout" {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}>
                 {t("apply")}
               </a>
-              <a href={`mailto:${site.email}`} className="btn btn--ghost">
+              <a href={contact.email.href} className="btn btn--ghost">
                 {t("hello")}
               </a>
             </div>

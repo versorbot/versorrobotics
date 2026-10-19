@@ -11,7 +11,7 @@ import styles from "./SprayLab.module.css";
 import { mountSprayLab } from "@/lib/sprayLab";
 
 /**
- * AGV spray rig simulator for the Spray-Runner (engine: lib/sprayLab.ts, a 1:1 port of reference/agv-spray-sim.html).
+ * AGV spray rig simulator for the pesticide printer (engine: lib/sprayLab.ts, a 1:1 port of reference/agv-spray-sim.html).
  * Its own labels stay in English on every language. Loaded client-only from SprayLabLoader.
  */
 export default function SprayLab() {
