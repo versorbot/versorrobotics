@@ -29,6 +29,11 @@
   max-width: 54ch;
 }
 
+.closing {
+  margin: 0;
+  max-width: none;
+}
+
 .unit {
   flex: none;
   width: clamp(150px, 17vw, 210px);

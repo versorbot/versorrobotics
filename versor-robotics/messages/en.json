@@ -36,24 +36,23 @@
     "repeat": "Repeat"
   },
   "vision": {
-    "title": "A print<br></br>head for<br></br><ink>pesticide.</ink>",
-    "lede": "Three machines spray a farm, and none of them can spray a plant. A tractor is wider than the row and cannot get in once the crop is up. A drone's downwash scatters the droplet before it lands. A person can reach anything but cannot spray the same way twice, and labour is scarce.",
+    "title": "Robots that<br></br>work inside<br></br><ink>crop rows.</ink>",
+    "lede": "Field work is heavy and repetitive, and labour is hard to find and costly. Big machines do not fit between crop rows. A tractor is wider than the row and cannot enter once the crop is up. A drone works from above. A person can reach anything but cannot keep up.",
     "unitAlt": "Versor rover, unit 07",
     "unitCaption": "Unit-07",
     "values": {
-      "leaf": {
-        "title": "Under the leaf",
-        "text": "The pest lives under the leaf. Every conventional sprayer works from above, so the underside stays dry. From the side, the whole leaf is wetted."
-      },
-      "printer": {
-        "title": "Like a printer",
-        "text": "A printer lays ink only where there is something to print. Our column of nozzles looks sideways at the plant and opens only where there is a leaf. Gaps get nothing."
-      },
       "platform": {
         "title": "One platform",
-        "text": "A four-wheeled autonomous robot that works inside grown crop rows, with attachments for logistics, spraying, harvesting and crop monitoring."
+        "text": "A four-wheeled autonomous robot that works inside grown crop rows. Attachments change the job: logistics, spraying, harvesting and crop monitoring."
+      },
+      "carrier": {
+        "text": "Our collaborative robot moves around on its own, follows you and carries the load, so your hands stay free. A light touch guides it anywhere, no hard pushing. Tested carrying loads at FPO Anekal and an Army base workshop."
+      },
+      "spray": {
+        "text": "Our spraying robot looks at the plant from the side and opens only the nozzles with a leaf in front of them. The whole leaf is wetted and gaps get nothing."
       }
-    }
+    },
+    "closing": "Where we are going: a robot that works with the farmer, not instead of the farmer, built in India for Indian crop rows."
   },
   "video": {
     "title": "See it in the field<dot>.</dot>",
