@@ -84,6 +84,13 @@ export default function Products() {
             );
           })}
         </div>
+
+        <p className={styles.more}>
+          <Link href="/pilots" className={styles.simLink}>
+            {t("pilots")}
+            <ArrowRight size={16} aria-hidden="true" />
+          </Link>
+        </p>
       </div>
     </Chapter>
   );

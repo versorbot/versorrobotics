@@ -68,6 +68,7 @@
     "cta": "Request a demo",
     "simulator": "Try the spray simulator",
     "economics": "See the economics",
+    "pilots": "See our pilots",
     "items": {
       "carrier": {
         "kind": "Collaborative mobile robot",
@@ -206,6 +207,7 @@
     "top": "Back to top",
     "nav": "Footer",
     "tagline": "Grown, not mined.",
+    "pilots": "Pilots",
     "simulator": "Spray simulator",
     "economics": "Unit economics"
   },
@@ -229,6 +231,109 @@
     "englishNote": "The calculator's own labels and numbers are in English.",
     "loading": "Loading the calculator…",
     "back": "Back to the machines"
+  },
+  "pilots": {
+    "metaTitle": "Pilots | Versor Robotics",
+    "metaDescription": "Two completed pilots of the Versor robot: load carrying on farms with FPO Anekal, and in the workshop at Army Base 515. What we tested and what we learned.",
+    "back": "Back to the machines",
+    "kicker": "Field pilots",
+    "title": "Pilots<dot>.</dot>",
+    "intro": "Two pilots have been completed: one on a farm, with FPO Anekal, and one in a workshop at Army Base 515. In both, we tested the robot carrying loads.",
+    "hero": {
+      "alt": "The Versor robot between leafy plants in a field, with a person standing beside it",
+      "caption": "The robot in the field"
+    },
+    "anekal": {
+      "kicker": "Farm pilot",
+      "title": "FPO Anekal",
+      "text": "FPO Anekal is a farmer producer organisation. We tested load carrying with its farmers. The farms we visited include open fields and polyhouses.",
+      "farms": "Farms visited",
+      "crops": "Crop types",
+      "cropList": "Rose, chrysanthemum, kamini, cucumber and banana",
+      "painTitle": "Pain points confirmed with farmers",
+      "pain": {
+        "1": "Labour availability",
+        "2": "Labour cost",
+        "3": "Dependence on migrant labour"
+      },
+      "photos": {
+        "load": {
+          "alt": "A man sitting on the Versor robot as it carries him and a sack along a dirt track on a farm",
+          "caption": "Load carrying, FPO Anekal"
+        },
+        "trellis": {
+          "alt": "A long row between trellis posts and overhead wires, with the robot and a blue crate at the far end",
+          "caption": "Down a trellis row"
+        },
+        "chrysanthemum": {
+          "alt": "Rows of yellow chrysanthemums in an open field, with a narrow dirt path between them",
+          "caption": "Chrysanthemum rows"
+        }
+      }
+    },
+    "lessons": {
+      "kicker": "Field notes",
+      "title": "Lessons from the field",
+      "items": {
+        "drip": {
+          "title": "Drip lines",
+          "text": "Drip irrigation lines were the biggest obstacle. They run along the beds and cross the paths the robot has to drive on."
+        },
+        "spacing": {
+          "title": "Uneven rows",
+          "text": "Row spacing is never uniform. It changes from farm to farm, and from one row to the next."
+        },
+        "turning": {
+          "title": "Turning",
+          "text": "Turning width is a bigger problem than row width. Driving along a row is easier than turning at the end of it."
+        }
+      },
+      "photos": {
+        "dripRows": {
+          "alt": "Bare crop beds with black drip irrigation lines running along them",
+          "caption": "Drip lines along the beds"
+        },
+        "dripCrossing": {
+          "alt": "A drip irrigation line crossing a muddy path between two planted beds",
+          "caption": "A drip line across the path"
+        },
+        "flowerRows": {
+          "alt": "Rows of flowering shrubs in an open field, with paths of different widths between them",
+          "caption": "Flower rows"
+        }
+      }
+    },
+    "army": {
+      "kicker": "Workshop pilot",
+      "title": "Army Base 515 workshop",
+      "text": "At the workshop of Army Base 515, we tested load carrying. The robot carried a crate of metal parts across the workshop floor.",
+      "photos": {
+        "workshop": {
+          "alt": "The Versor robot on the painted floor of a large workshop, with people watching",
+          "caption": "The workshop, Army Base 515"
+        },
+        "load": {
+          "alt": "The Versor robot carrying a blue crate full of metal parts",
+          "caption": "Load carrying, Army Base 515"
+        }
+      }
+    },
+    "row": {
+      "kicker": "Field demo",
+      "title": "Inside a grown crop row",
+      "text": "A tractor cannot enter a field once the crop is up. The robot has worked inside a grown crop row, carrying a crate between the plants while a person picked.",
+      "photos": {
+        "crate": {
+          "alt": "A person picking cucumbers into a blue crate on the robot, in a narrow row of tall climbing plants",
+          "caption": "Working inside a grown crop row"
+        },
+        "trellis": {
+          "alt": "The robot with a blue crate standing in a row of climbing plants on trellis poles",
+          "caption": "A crate between the rows"
+        }
+      }
+    },
+    "cta": "Ask about a pilot"
   },
   "notFound": {
     "title": "Off the map<dot>.</dot>",

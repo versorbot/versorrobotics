@@ -185,3 +185,7 @@
 .simLink:hover {
   color: var(--cream);
 }
+
+.more {
+  margin: clamp(32px, 5vh, 56px) 0 0;
+}

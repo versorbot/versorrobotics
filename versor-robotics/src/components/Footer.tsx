@@ -22,6 +22,7 @@ export default function Footer() {
               {tn(id)}
             </a>
           ))}
+          <Link href="/pilots">{t("pilots")}</Link>
           <Link href="/simulator">{t("simulator")}</Link>
           <Link href="/economics">{t("economics")}</Link>
         </nav>

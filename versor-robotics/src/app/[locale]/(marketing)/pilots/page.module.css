@@ -1,0 +1,261 @@
+.intro {
+  padding-top: calc(var(--header-h) + clamp(32px, 7vh, 72px));
+  padding-bottom: clamp(48px, 8vh, 88px);
+}
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 22px;
+  font-family: var(--font-label);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--cream-70);
+}
+
+.back:hover {
+  color: var(--amber);
+}
+
+/* text on the left, photos on the right */
+.split {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  gap: clamp(32px, 4.5vw, 64px);
+  align-items: start;
+}
+
+.section {
+  padding-block: clamp(56px, 10vh, 104px);
+  border-top: 3px solid var(--ink-2);
+}
+
+.shade {
+  background: var(--ink-2);
+  border-top-color: var(--deep);
+}
+
+.h2 {
+  margin: 12px 0 0;
+  font-size: clamp(1.6rem, 3.2vw, 2.5rem);
+  font-weight: 900;
+  line-height: 1.05;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+}
+
+.text {
+  max-width: 54ch;
+  margin: 18px 0 0;
+  font-size: clamp(1rem, 1.35vw, 1.1rem);
+  color: var(--cream-70);
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  max-width: 420px;
+  margin: 28px 0 0;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 4px;
+  padding: 14px 18px 16px;
+  background: var(--deep);
+  border: 3px solid #0b1413;
+  box-shadow: 5px 5px 0 #0b1413;
+}
+
+.stat dt {
+  font-family: var(--font-label);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--cream-70);
+}
+
+.stat dd {
+  margin: 0;
+  font-size: clamp(2rem, 3.4vw, 2.6rem);
+  font-weight: 900;
+  line-height: 1;
+  color: var(--amber);
+}
+
+.crops {
+  margin: 20px 0 0;
+  font-weight: 700;
+}
+
+.listTitle {
+  margin: 28px 0 0;
+  font-family: var(--font-label);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--amber);
+}
+
+.list {
+  display: grid;
+  gap: 8px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 14.5px;
+  font-weight: 600;
+}
+
+.list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.list li svg {
+  flex: none;
+  color: var(--sprout);
+}
+
+.media {
+  display: grid;
+  gap: 28px;
+}
+
+/* ── photos: a row at one shared height, each in an arcade-cabinet frame like the product cards ── */
+
+.row {
+  display: flex;
+  align-items: flex-start;
+  gap: 22px;
+}
+
+.section .row {
+  margin-top: clamp(28px, 4vh, 44px);
+}
+
+.media .row,
+.split > .row {
+  margin-top: 0;
+}
+
+.photo {
+  /* grows in proportion to its aspect ratio; 32px is the frame (padding + borders), the same for every photo */
+  flex: var(--r) 1 32px;
+  min-width: 0;
+  margin: 0;
+}
+
+.frame {
+  padding: 10px;
+  background: var(--steel);
+  border: 3px solid #0b1413;
+  border-radius: 6px;
+  box-shadow: 8px 8px 0 #0b1413;
+}
+
+.frame img {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: var(--deep);
+  border: 3px solid var(--ink);
+}
+
+.photo figcaption {
+  margin-top: 14px;
+  font-family: var(--font-label);
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--cream-70);
+}
+
+/* ── lessons ── */
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(20px, 2.4vw, 32px);
+  margin: clamp(28px, 4vh, 44px) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cardWrap {
+  height: 100%;
+}
+
+.card {
+  height: 100%;
+  padding: 22px 22px 24px;
+  background: var(--deep);
+  border: 3px solid #0b1413;
+  box-shadow: 8px 8px 0 #0b1413;
+}
+
+.card h3 {
+  margin: 0 0 10px;
+  font-family: var(--font-label);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--amber);
+}
+
+.card p {
+  margin: 0;
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: var(--cream-70);
+}
+
+.cta {
+  margin: clamp(40px, 6vh, 64px) 0 0;
+}
+
+@media (max-width: 900px) {
+  .split {
+    grid-template-columns: 1fr;
+  }
+
+  .cards {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .row {
+    gap: 16px;
+  }
+
+  .frame {
+    padding: 6px;
+    box-shadow: 6px 6px 0 #0b1413;
+  }
+
+  .photo {
+    flex-basis: 24px;
+  }
+
+  .stack {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 26px;
+  }
+
+  .stack .photo {
+    flex: none;
+  }
+}
