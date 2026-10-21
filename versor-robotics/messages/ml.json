@@ -211,7 +211,8 @@
     "economics": "ചെലവും വരുമാനവും"
   },
   "rover": {
-    "hint": "എന്നെ പിടിക്കൂ!"
+    "hint": "എന്നെ പിടിക്കൂ!",
+    "toggle": "കുഞ്ഞൻ റോബോട്ട് ഓൺ/ഓഫ്"
   },
   "simulator": {
     "metaTitle": "സ്പ്രേ സിമുലേറ്റർ | Versor Robotics",

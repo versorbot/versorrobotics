@@ -1,0 +1,76 @@
+/* Mascot on/off: only for a mouse. Bottom-left, where no other control sits on any page
+   (the spray simulator's sticky panel runs down the right-hand side). */
+.toggle {
+  position: fixed;
+  left: 16px;
+  bottom: 16px;
+  z-index: 91; /* above the rover, so it never covers the switch */
+  display: none;
+  width: 40px;
+  height: 40px;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  color: var(--ink);
+  background: var(--amber);
+  border: 2px solid var(--ink);
+  border-radius: 3px;
+  box-shadow: 3px 3px 0 var(--ink);
+  cursor: pointer;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, background-color 0.15s ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .toggle {
+    display: inline-flex;
+  }
+}
+
+.toggle[aria-pressed="false"] {
+  background: var(--cream);
+}
+
+.toggle:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0 var(--ink);
+}
+
+.toggle:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 var(--ink);
+}
+
+/* tooltip, in the same style as the rover's "Grab me!" bubble */
+.tip {
+  position: absolute;
+  left: calc(100% + 10px);
+  top: 50%;
+  padding: 5px 9px;
+  font-family: var(--font-label);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--ink);
+  background: var(--cream);
+  border: 2px solid var(--ink);
+  box-shadow: 3px 3px 0 var(--ink);
+  pointer-events: none;
+  opacity: 0;
+  transform: translate(-4px, -50%);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.toggle:hover .tip,
+.toggle:focus-visible .tip {
+  opacity: 1;
+  transform: translate(0, -50%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toggle,
+  .tip {
+    transition: none;
+  }
+}

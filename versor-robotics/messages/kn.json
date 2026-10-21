@@ -211,7 +211,8 @@
     "economics": "ಖರ್ಚು ಮತ್ತು ಆದಾಯ"
   },
   "rover": {
-    "hint": "ನನ್ನನ್ನು ಹಿಡಿ!"
+    "hint": "ನನ್ನನ್ನು ಹಿಡಿ!",
+    "toggle": "ಪುಟ್ಟ ರೋಬೋಟ್ ಆನ್/ಆಫ್"
   },
   "simulator": {
     "metaTitle": "ಸ್ಪ್ರೇ ಸಿಮ್ಯುಲೇಟರ್ | Versor Robotics",

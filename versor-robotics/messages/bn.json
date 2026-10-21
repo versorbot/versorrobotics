@@ -211,7 +211,8 @@
     "economics": "খরচ আর আয়"
   },
   "rover": {
-    "hint": "আমাকে ধরো!"
+    "hint": "আমাকে ধরো!",
+    "toggle": "ছোট রোবট চালু/বন্ধ"
   },
   "simulator": {
     "metaTitle": "স্প্রে সিমুলেটর | Versor Robotics",

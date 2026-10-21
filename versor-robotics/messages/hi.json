@@ -211,7 +211,8 @@
     "economics": "लागत और कमाई"
   },
   "rover": {
-    "hint": "मुझे पकड़ो!"
+    "hint": "मुझे पकड़ो!",
+    "toggle": "छोटा रोबोट चालू/बंद"
   },
   "simulator": {
     "metaTitle": "स्प्रे सिम्युलेटर | Versor Robotics",

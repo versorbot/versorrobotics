@@ -211,7 +211,8 @@
     "economics": "Unit economics"
   },
   "rover": {
-    "hint": "Grab me!"
+    "hint": "Grab me!",
+    "toggle": "Mascot on/off"
   },
   "simulator": {
     "metaTitle": "Spray simulator | Versor Robotics",

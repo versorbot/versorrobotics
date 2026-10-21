@@ -211,7 +211,8 @@
     "economics": "खर्च आणि कमाई"
   },
   "rover": {
-    "hint": "मला पकडा!"
+    "hint": "मला पकडा!",
+    "toggle": "छोटा रोबोट चालू/बंद"
   },
   "simulator": {
     "metaTitle": "स्प्रे सिम्युलेटर | Versor Robotics",

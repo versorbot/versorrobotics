@@ -11,6 +11,13 @@ const HOLD_MS = 10_000; // how long it stays where you put it
 const START_MS = 1_600; // first drive-off after the page loads
 const SPEED = 125; // ground speed in px/s
 
+// flick it up on a touch screen and it flies away
+const FLICK_SPEED = 900; // upward finger speed on release, screen px/s
+const FLICK_MIN = 40; // how far up the finger must have moved since the grab, px
+const FLY_S = 0.6; // lift-off to gone
+const FADE_S = 0.2; // the same, with reduced motion: just a fade
+const FLY_ACCEL = 3000; // upward acceleration while it flies, px/s²
+
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
 const wrap = (a: number) => {
   while (a > Math.PI) a -= Math.PI * 2;
@@ -30,15 +37,21 @@ const hits = (x: number, y: number, rs: Rect[], pad: number) =>
  *  - It drives around the screen all by itself and keeps going whatever you do (mouse, keyboard, scrolling).
  *  - The only thing that stops it is you grabbing it: pick it up, drop it anywhere and it stays put for 10 s, then drives off again.
  *  - It never drives over (or sits on) anything marked data-rover-avoid: the video screen and the game.
+ *  - On a touch screen, flick it upwards and it flies away; onFlyAway is called once it has gone.
  */
-export default function RoverToy() {
+export default function RoverToy({ onFlyAway }: { onFlyAway?: () => void }) {
   const t = useTranslations("rover");
   const root = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const grabRef = useRef<HTMLDivElement>(null);
   const fbRef = useRef<HTMLDivElement>(null);
+  const flyAwayRef = useRef(onFlyAway);
   const [fallback, setFallback] = useState(false);
   const [hint, setHint] = useState(true);
+
+  useEffect(() => {
+    flyAwayRef.current = onFlyAway;
+  });
 
   useEffect(() => {
     const el = root.current;
@@ -91,7 +104,7 @@ export default function RoverToy() {
     let lift = 0;
     let liftV = 0;
 
-    type Mode = "hold" | "roam" | "drag" | "eject";
+    type Mode = "hold" | "roam" | "drag" | "eject" | "fly";
     let mode: Mode = "hold";
     let holdUntil = performance.now() + (reduce ? Infinity : START_MS);
     let tgx = gx;
@@ -105,6 +118,17 @@ export default function RoverToy() {
     let ejectT = 0;
     let ejFromX = 0;
     let ejFromZ = 0;
+    // the finger's recent path (screen px, ms), for spotting a flick on release
+    let trail: { t: number; x: number; y: number }[] = [];
+    let downY = 0;
+    let flyStart = 0;
+    let flyX = 0;
+    let flyY = 0;
+    let flyVx = 0;
+    let flyVy = 0;
+    let flyH = 0;
+    let flyDir = 1;
+    let flyK = 0;
     let raf = 0;
     let last = performance.now();
     let lastRender = 0;
@@ -180,12 +204,14 @@ export default function RoverToy() {
 
     // ── dragging ──
     const onDown = (e: PointerEvent) => {
-      if (e.pointerType === "mouse" && e.button !== 0) return;
+      if (mode === "fly" || (e.pointerType === "mouse" && e.button !== 0)) return;
       e.preventDefault();
       grab.setPointerCapture(e.pointerId);
       mode = "drag";
       offX = e.clientX - gx;
       offY = e.clientY - sy();
+      trail = [{ t: e.timeStamp, x: e.clientX, y: e.clientY }];
+      downY = e.clientY;
       v = 0;
       om = 0;
       dvx = 0;
@@ -211,8 +237,28 @@ export default function RoverToy() {
       }
       return { x, y };
     };
+    /** a fast, mostly vertical swipe upwards at the moment of release (touch / pen only), in screen px/s */
+    const flick = (e: PointerEvent) => {
+      if (e.pointerType === "mouse" || e.type === "pointercancel") return null;
+      const prev = trail[trail.length - 1];
+      if (e.clientX !== prev.x || e.clientY !== prev.y) trail.push({ t: e.timeStamp, x: e.clientX, y: e.clientY });
+      const end = trail[trail.length - 1];
+      if (trail.length < 2 || e.timeStamp - end.t > 70) return null; // the finger had stopped before letting go
+      // speed over the last 100 ms of movement
+      let i = trail.length - 2;
+      while (i > 0 && end.t - trail[i - 1].t <= 100) i--;
+      const start = trail[i];
+      const dt = (end.t - start.t) / 1000;
+      if (dt <= 0) return null;
+      const vx = (end.x - start.x) / dt;
+      const vy = (end.y - start.y) / dt;
+      const up = -vy > FLICK_SPEED && Math.abs(vx) < -vy * 0.6 && downY - end.y >= FLICK_MIN;
+      return up ? { vx, vy } : null;
+    };
     const onMove = (e: PointerEvent) => {
       if (mode !== "drag") return;
+      trail.push({ t: e.timeStamp, x: e.clientX, y: e.clientY });
+      if (trail.length > 2 && e.timeStamp - trail[1].t > 150) trail.shift();
       const rs = readAvoid();
       const p = resolve(clamp(e.clientX - offX, 24, W - 24), clamp(e.clientY - offY, 30, H - 4), rs);
       gx = clamp(p.x, 24, W - 24);
@@ -223,6 +269,23 @@ export default function RoverToy() {
       if (grab.hasPointerCapture(e.pointerId)) grab.releasePointerCapture(e.pointerId);
       grab.classList.remove(styles.lifted);
       const now = performance.now();
+      const f = flick(e);
+      if (f) {
+        // off it goes: lift-off, then up and away with a little tilt and spin
+        mode = "fly";
+        flyStart = now;
+        flyX = gx;
+        flyY = sy();
+        flyVx = clamp(f.vx, -700, 700);
+        flyVy = clamp(-f.vy * 0.4, 360, 900); // starts a little slower than the finger, so the lift-off stays on screen
+        flyH = h;
+        flyDir = f.vx < 0 ? -1 : 1;
+        flyK = 0;
+        grab.style.pointerEvents = "none";
+        el.style.transition = "none";
+        el.style.transformOrigin = `${ORIGIN_X}px ${ORIGIN_Y - 36}px`;
+        return;
+      }
       const rs = readAvoid();
       v = 0;
       if (hits(gx, sy(), rs, 0)) {
@@ -336,14 +399,23 @@ export default function RoverToy() {
           om *= Math.exp(-dt * 8);
         }
         v = Math.min(sp, 260) * 0.25;
+      } else if (mode === "fly") {
+        // driven by the time since release, not by frames, so it plays the same at any frame rate
+        const s = (now - flyStart) / 1000;
+        flyK = Math.min(1, s / (reduce ? FADE_S : FLY_S));
+        v = 0;
+        om = 0;
+        if (!reduce) h = wrap(flyH + flyDir * 6 * s * s);
       }
 
       // keep it on screen
-      gx = clamp(gx, 24, W - 24);
-      gz = clamp(sy(), 30, H - 4) / SIN_E;
+      if (mode !== "fly") {
+        gx = clamp(gx, 24, W - 24);
+        gz = clamp(sy(), 30, H - 4) / SIN_E;
+      }
 
       // lift / drop spring (bounces a little on landing)
-      const liftTarget = mode === "drag" ? 1 : 0;
+      const liftTarget = mode === "drag" || mode === "fly" ? 1 : 0;
       liftV += ((liftTarget - lift) * 190 - liftV * 12) * dt;
       lift += liftV * dt;
 
@@ -359,7 +431,10 @@ export default function RoverToy() {
 
       // wheels: left/right turn at different rates when steering (that is what makes the turns look real)
       const vw = v / PX_PER_UNIT;
-      if (mode === "drag") {
+      if (mode === "fly") {
+        spinL += 14 * dt;
+        spinR += 14 * dt;
+      } else if (mode === "drag") {
         spinL += 2.2 * dt * (1 + vn * 2);
         spinR += 2.2 * dt * (1 + vn * 2);
       } else {
@@ -368,16 +443,26 @@ export default function RoverToy() {
       }
 
       // is it over the video / game? then it is simply not there
-      const nowHidden = mode !== "drag" && hits(gx, sy(), rs, 0);
+      const nowHidden = mode !== "drag" && mode !== "fly" && hits(gx, sy(), rs, 0);
       if (nowHidden !== hidden) {
         hidden = nowHidden;
         el.classList.toggle(styles.hidden, hidden);
       }
 
       // place it
-      const px = gx;
-      const py = sy();
-      el.style.transform = `translate3d(${(px - ORIGIN_X).toFixed(1)}px, ${(py - ORIGIN_Y).toFixed(1)}px, 0)`;
+      if (mode === "fly") {
+        const s = (now - flyStart) / 1000;
+        const rise = reduce ? 0 : flyVy * s + 0.5 * FLY_ACCEL * s * s;
+        const drift = reduce ? 0 : flyVx * 0.35 * s;
+        const tilt = reduce ? 0 : flyDir * 14 * Math.min(1, flyK * 2.5);
+        const scale = reduce ? 1 : 1 - 0.3 * flyK;
+        el.style.transform = `translate3d(${(flyX + drift - ORIGIN_X).toFixed(1)}px, ${(flyY - rise - ORIGIN_Y).toFixed(1)}px, 0) rotate(${tilt.toFixed(2)}deg) scale(${scale.toFixed(3)})`;
+        el.style.opacity = (1 - (reduce ? flyK : flyK * flyK)).toFixed(3);
+      } else {
+        const px = gx;
+        const py = sy();
+        el.style.transform = `translate3d(${(px - ORIGIN_X).toFixed(1)}px, ${(py - ORIGIN_Y).toFixed(1)}px, 0)`;
+      }
 
       const settled = mode === "hold" && v < 1 && Math.abs(om) < 0.02 && Math.abs(lift) < 0.004 && Math.abs(liftV) < 0.02;
       if (!hidden && (!settled || now - lastRender > 66)) {
@@ -410,6 +495,13 @@ export default function RoverToy() {
           fb.classList.toggle(styles.driving, v > 8);
           if (!el.classList.contains(styles.ready)) el.classList.add(styles.ready);
         }
+      }
+
+      // flown away: stop here and let the parent unmount it
+      if (mode === "fly" && flyK >= 1) {
+        cancelAnimationFrame(raf);
+        el.style.visibility = "hidden";
+        flyAwayRef.current?.();
       }
     };
 

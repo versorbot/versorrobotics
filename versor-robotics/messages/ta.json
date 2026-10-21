@@ -211,7 +211,8 @@
     "economics": "செலவும் வருமானமும்"
   },
   "rover": {
-    "hint": "என்னைப் பிடி!"
+    "hint": "என்னைப் பிடி!",
+    "toggle": "சிறிய ரோபோ ஆன்/ஆஃப்"
   },
   "simulator": {
     "metaTitle": "ஸ்ப்ரே சிமுலேட்டர் | Versor Robotics",

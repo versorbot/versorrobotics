@@ -2,7 +2,7 @@ import { setRequestLocale } from "next-intl/server";
 import type { Locale } from "@/i18n/routing";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import RoverToy from "@/components/RoverToy";
+import Mascot from "@/components/Mascot";
 import SmoothAnchors from "@/components/SmoothAnchors";
 
 /** Chrome shared by the public marketing pages. Other route groups (login, dashboard…) can have their own layout. */
@@ -14,7 +14,7 @@ export default async function MarketingLayout({ children, params }: LayoutProps<
       <Header />
       <main>{children}</main>
       <Footer />
-      <RoverToy />
+      <Mascot />
       <SmoothAnchors />
     </>
   );

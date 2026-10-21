@@ -211,7 +211,8 @@
     "economics": "ఖర్చు, ఆదాయం"
   },
   "rover": {
-    "hint": "నన్ను పట్టుకో!"
+    "hint": "నన్ను పట్టుకో!",
+    "toggle": "చిన్న రోబో ఆన్/ఆఫ్"
   },
   "simulator": {
     "metaTitle": "స్ప్రే సిమ్యులేటర్ | Versor Robotics",
