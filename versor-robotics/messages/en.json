@@ -100,20 +100,20 @@
         "status": "Following"
       },
       "spray": {
-        "title": "Autonomous Spraying",
-        "text": "Set the rows, press go. The boom drives the lines and sprays along the path with nobody at the controls.",
+        "title": "Leaf-Only Spraying",
+        "text": "It looks at each plant and sprays it from the side. Only the nozzles with a leaf in front of them open, so gaps get nothing.",
         "diagram": "Top-down map: a spraying rover drives across crop rows and wets them"
       },
       "asr": {
-        "title": "ASR Module",
-        "text": "Talk to your robot. Onboard speech recognition turns plain spoken commands into actions, even with gloves on and the engine running.",
+        "title": "Talk to It",
+        "text": "Just tell the robot what to do. Say it out loud in plain, everyday words, and the robot listens and gets the job done.",
         "diagram": "A spoken command, 'Spray rows three to six', and the robot's spoken reply",
         "command": "“Spray rows three to six.”",
         "reply": "Copy. Starting now."
       },
       "waypoint": {
-        "title": "Waypoint Navigation",
-        "text": "Drop pins on the map and the robot drives the route in order: stop by stop, row by row, and back home.",
+        "title": "Set the Route",
+        "text": "Pick a few points on the map. The robot drives to each one in order, one stop after the next.",
         "diagram": "A map with four numbered waypoints; the rover drives them in order"
       }
     }
