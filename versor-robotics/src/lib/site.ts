@@ -55,12 +55,12 @@ export const site: SiteConfig = {
       embedUrl: "", // e.g. "https://docs.google.com/forms/d/e/XXXX/viewform?embedded=true"
     },
     contact: {
-      action: "", // e.g. "https://docs.google.com/forms/d/e/XXXX/formResponse"
+      action: "https://docs.google.com/forms/d/e/1FAIpQLSf4PRk88ng_O9EXkML1_RW2-Xx28T_REU2P9DJ-fV4rqG-Riw/formResponse",
       fields: {
-        name: "", // e.g. "entry.1111111111"
-        email: "", // e.g. "entry.2222222222"
-        interest: "", // e.g. "entry.3333333333"
-        message: "", // e.g. "entry.4444444444"
+        name: "entry.356682",
+        email: "entry.1470962296",
+        interest: "entry.2015715880",
+        message: "entry.8242097",
       },
     },
   },
