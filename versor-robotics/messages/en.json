@@ -24,7 +24,7 @@
   },
   "hero": {
     "badge": "Field systems online",
-    "lede": "Autonomous machines for the fields of tomorrow. We build farm robots with the soul of an arcade cabinet: rugged, precise, and quietly relentless.",
+    "lede": "Autonomous machines for the fields of tomorrow. We build farm robots made for hard work in the field: rugged, precise, and quietly relentless.",
     "ctaMachines": "See the machines",
     "ctaVision": "Read the vision"
   },
@@ -148,7 +148,7 @@
   },
   "join": {
     "title": "Grow with<br></br>the fleet<dot>.</dot>",
-    "lede": "We are engineers, agronomists and ex-arcade kids building machines that smell like soil and hum like synthesizers. Come build the fleet with us.",
+    "lede": "We are engineers building machines that smell like soil and keep going when the day gets long. Come build the fleet with us.",
     "apply": "Apply now",
     "hello": "Say hello",
     "applySubject": "Application: Versor Robotics",
