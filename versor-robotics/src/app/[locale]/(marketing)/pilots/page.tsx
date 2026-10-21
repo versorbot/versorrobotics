@@ -4,7 +4,7 @@ import Image from "next/image";
 import { ArrowLeft, Check } from "lucide-react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import Reveal from "@/components/Reveal";
-import { alternatesFor } from "@/i18n/metadata";
+import { seoFor } from "@/i18n/metadata";
 import { rich } from "@/i18n/rich";
 import { localePath, type Locale } from "@/i18n/routing";
 import styles from "./page.module.css";
@@ -72,7 +72,7 @@ export async function generateMetadata({ params }: PageProps<"/[locale]/pilots">
   return {
     title: t("metaTitle"),
     description: t("metaDescription"),
-    alternates: alternatesFor(locale, "/pilots"),
+    ...(await seoFor(locale, "/pilots")),
   };
 }
 

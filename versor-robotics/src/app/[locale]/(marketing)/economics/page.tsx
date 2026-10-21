@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { ArrowLeft } from "lucide-react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import EconomicsCalcLoader from "@/components/EconomicsCalcLoader";
-import { alternatesFor } from "@/i18n/metadata";
+import { seoFor } from "@/i18n/metadata";
 import { rich } from "@/i18n/rich";
 import { localePath, type Locale } from "@/i18n/routing";
 import { products } from "@/lib/site";
@@ -16,7 +16,7 @@ export async function generateMetadata({ params }: PageProps<"/[locale]/economic
   return {
     title: t("metaTitle"),
     description: t("metaDescription"),
-    alternates: alternatesFor(locale, "/economics"),
+    ...(await seoFor(locale, "/economics")),
   };
 }
 

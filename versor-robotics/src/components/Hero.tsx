@@ -4,8 +4,8 @@ import { CarrierBot, SprayerBot, SproutIcon } from "./illustrations/Bots";
 import Marquee from "./Marquee";
 import { site } from "@/lib/site";
 
-const VERSOR = "VERSOR".split("");
-const ROBOTICS = "ROBOTICS".split("");
+// the H1's text reads "Versor Robotics"; .title's text-transform shows it in capitals
+const [VERSOR, ROBOTICS] = site.name.split(" ").map((word) => word.split(""));
 
 const Letters = ({ text, offset = 0 }: { text: string[]; offset?: number }) => (
   <>
@@ -34,10 +34,10 @@ export default function Hero() {
         </p>
 
         <h1 className={styles.title} aria-label={site.name} lang="en">
-          <span className={styles.versor} aria-hidden="true">
+          <span className={styles.versor}>
             <Letters text={VERSOR} />
-          </span>
-          <span className={styles.robotics} aria-hidden="true">
+          </span>{" "}
+          <span className={styles.robotics}>
             <Letters text={ROBOTICS} offset={4} />
           </span>
         </h1>

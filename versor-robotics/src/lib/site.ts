@@ -21,11 +21,9 @@ interface SiteConfig {
 export const site: SiteConfig = {
   name: "Versor Robotics",
 
-  // Public address of the site, used for canonical + hreflang links. Set NEXT_PUBLIC_SITE_URL
-  // (e.g. "https://versorrobotics.farm"); on Vercel the production domain is picked up automatically.
-  url:
-    process.env.NEXT_PUBLIC_SITE_URL ||
-    (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : "http://localhost:3000"),
+  // The one public address of the site: canonical, hreflang, og:url, sitemap, robots and JSON-LD all use it.
+  // Fixed on purpose (never built from VERCEL_URL), so every deployment points search engines here.
+  url: "https://www.versor.bot",
 
   /* ── VIDEO ───────────────────────────────────────────────────
    * Option A (self-hosted): drop your file at  public/videos/versor-demo.mp4

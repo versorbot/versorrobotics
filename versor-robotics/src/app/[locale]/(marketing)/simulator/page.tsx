@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { ArrowLeft } from "lucide-react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import SprayLabLoader from "@/components/SprayLabLoader";
-import { alternatesFor } from "@/i18n/metadata";
+import { seoFor } from "@/i18n/metadata";
 import { rich } from "@/i18n/rich";
 import { localePath, type Locale } from "@/i18n/routing";
 import { products } from "@/lib/site";
@@ -16,7 +16,7 @@ export async function generateMetadata({ params }: PageProps<"/[locale]/simulato
   return {
     title: t("metaTitle"),
     description: t("metaDescription"),
-    alternates: alternatesFor(locale, "/simulator"),
+    ...(await seoFor(locale, "/simulator")),
   };
 }
 

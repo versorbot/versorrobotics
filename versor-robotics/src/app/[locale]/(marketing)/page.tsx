@@ -9,18 +9,33 @@ import Features from "@/components/Features";
 import Contact from "@/components/Contact";
 import JoinUs from "@/components/JoinUs";
 import Game from "@/components/Game";
-import { alternatesFor } from "@/i18n/metadata";
+import { seoFor } from "@/i18n/metadata";
+import { contact, site } from "@/lib/site";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]">): Promise<Metadata> {
   const { locale } = await params;
-  return { alternates: alternatesFor(locale) };
+  return seoFor(locale);
 }
+
+/** Who we are, for search engines (schema.org Organization). */
+const organization = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: site.name,
+  url: site.url,
+  logo: `${site.url}/icon.svg`,
+  email: contact.email.label,
+};
 
 export default async function Home({ params }: PageProps<"/[locale]">) {
   const { locale } = await params;
   setRequestLocale(locale as Locale); // the root layout has already 404ed anything else
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(organization).replace(/</g, "\\u003c") }}
+      />
       <Hero />
       <Vision />
       <VideoSection />
