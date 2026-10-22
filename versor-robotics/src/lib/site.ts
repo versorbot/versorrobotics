@@ -23,7 +23,7 @@ interface SiteConfig {
  * JSON-LD all use it. NEXT_PUBLIC_SITE_URL can override it; it is never built from VERCEL_URL, so every
  * deployment points search engines at the real address. No trailing slash.
  */
-export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "https://versorbots.com").replace(/\/+$/, "");
+export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "https://www.versorbots.com").replace(/\/+$/, "");
 
 export const site: SiteConfig = {
   name: "Versor Robotics",
