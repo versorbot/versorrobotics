@@ -96,7 +96,7 @@ export const presence = {
       name: "Viboosithasri's Journey from Corporate to Farm Automation Pioneer (ARTPARK on LinkedIn)",
       url: "https://www.linkedin.com/posts/artpark-in_inwed2026-womeninengineering-artpark-activity-7475140340933525505-hyNR",
     },
-    { name: "Versor Robotics on Instagram", url: "https://www.instagram.com/reel/DbkvOB5hu7H/" },
+    { name: "Instagram reel about Versor Robotics", url: "https://www.instagram.com/reel/DbkvOB5hu7H/" },
   ],
 } as const;
 
