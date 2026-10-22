@@ -77,6 +77,30 @@ export const contact = {
 } as const;
 
 /**
+ * For search engines (the home page's Organization structured data).
+ * profiles: our own pages on other sites (sameAs), e.g. the company's Instagram, LinkedIn or YouTube page.
+ *           Only pages that are about the company itself, never single posts or videos.
+ * coverage: posts and videos by others that are about us (subjectOf).
+ */
+export const presence = {
+  logo: "/logo.png",
+  address: { street: "ARTGARAGE, Jalahalli", locality: "Bengaluru", region: "Karnataka", country: "IN" },
+  profiles: ["https://pitchbook.com/profiles/company/962066-26"],
+  coverage: [
+    { name: "Versor Robotics Pitch (Campus Fund)", url: "https://www.youtube.com/shorts/ZptsHeMqcws" },
+    {
+      name: "Building Robots for Indian Farms | Viboosithasri NS | Versor Robotics | ARTPARK | INWED 2026",
+      url: "https://www.youtube.com/shorts/JLGS2Sg34Bk",
+    },
+    {
+      name: "Viboosithasri's Journey from Corporate to Farm Automation Pioneer (ARTPARK on LinkedIn)",
+      url: "https://www.linkedin.com/posts/artpark-in_inwed2026-womeninengineering-artpark-activity-7475140340933525505-hyNR",
+    },
+    { name: "Versor Robotics on Instagram", url: "https://www.instagram.com/reel/DbkvOB5hu7H/" },
+  ],
+} as const;
+
+/**
  * Products. Names and codes stay in Latin script in every language, so they live here.
  * Everything a visitor reads about them (kind, tagline, bullet points) is in messages/<locale>.json under products.items.<id>.
  */
