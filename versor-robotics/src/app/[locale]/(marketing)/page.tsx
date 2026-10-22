@@ -17,14 +17,27 @@ export async function generateMetadata({ params }: PageProps<"/[locale]">): Prom
   return seoFor(locale);
 }
 
-/** Who we are, for search engines (schema.org Organization). */
-const organization = {
+/**
+ * Who we are, for search engines: the site's name (schema.org WebSite, which Google shows above the result
+ * instead of the domain) and the company behind it (Organization).
+ */
+const structuredData = {
   "@context": "https://schema.org",
-  "@type": "Organization",
-  name: site.name,
-  url: site.url,
-  logo: `${site.url}/icon.svg`,
-  email: contact.email.label,
+  "@graph": [
+    {
+      "@type": "WebSite",
+      name: site.name,
+      alternateName: "Versor",
+      url: `${site.url}/`,
+    },
+    {
+      "@type": "Organization",
+      name: site.name,
+      url: site.url,
+      logo: `${site.url}/icon.svg`,
+      email: contact.email.label,
+    },
+  ],
 };
 
 export default async function Home({ params }: PageProps<"/[locale]">) {
@@ -34,7 +47,7 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(organization).replace(/</g, "\\u003c") }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData).replace(/</g, "\\u003c") }}
       />
       <Hero />
       <Vision />
