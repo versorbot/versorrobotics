@@ -18,12 +18,17 @@ interface SiteConfig {
   };
 }
 
+/**
+ * The one public address of the site: metadataBase, canonical, hreflang, og:url, og:image, sitemap, robots and
+ * JSON-LD all use it. NEXT_PUBLIC_SITE_URL can override it; it is never built from VERCEL_URL, so every
+ * deployment points search engines at the real address. No trailing slash.
+ */
+export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "https://versorbots.com").replace(/\/+$/, "");
+
 export const site: SiteConfig = {
   name: "Versor Robotics",
 
-  // The one public address of the site: canonical, hreflang, og:url, sitemap, robots and JSON-LD all use it.
-  // Fixed on purpose (never built from VERCEL_URL), so every deployment points search engines here.
-  url: "https://www.versor.bot",
+  url: SITE_URL,
 
   /* ── VIDEO ───────────────────────────────────────────────────
    * Option A (self-hosted): drop your file at  public/videos/versor-demo.mp4
