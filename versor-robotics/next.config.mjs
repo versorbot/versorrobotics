@@ -17,7 +17,7 @@ const nextConfig = {
       {
         source: "/:path*",
         has: [{ type: "host", value: "versorrobotics.vercel.app" }],
-        destination: "https://www.versor.bot/:path*",
+        destination: "https://www.versorbots.com/:path*",
         permanent: true,
       },
     ];
