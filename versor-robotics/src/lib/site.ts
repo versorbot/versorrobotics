@@ -74,6 +74,7 @@ export const contact = {
   phone: { label: "+91 73585 50729", href: "tel:+917358550729" },
   email: { label: "vidhyasagar@artpark.in", href: "mailto:vidhyasagar@artpark.in" },
   location: { label: "ARTGARAGE, Jalahalli", href: "https://maps.app.goo.gl/MeJVgti6JbmCGAaBA" },
+  instagram: { label: "@versorrobotics", href: "https://www.instagram.com/versorrobotics/" },
 } as const;
 
 /**
@@ -85,7 +86,7 @@ export const contact = {
 export const presence = {
   logo: "/logo.png",
   address: { street: "ARTGARAGE, Jalahalli", locality: "Bengaluru", region: "Karnataka", country: "IN" },
-  profiles: ["https://pitchbook.com/profiles/company/962066-26"],
+  profiles: [contact.instagram.href, "https://pitchbook.com/profiles/company/962066-26"],
   coverage: [
     { name: "Versor Robotics Pitch (Campus Fund)", url: "https://www.youtube.com/shorts/ZptsHeMqcws" },
     {

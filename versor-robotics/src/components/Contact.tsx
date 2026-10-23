@@ -10,6 +10,27 @@ import { contact, products } from "@/lib/site";
 
 const INTERESTS = [...products.map((p) => p.id), "both", "other"] as const;
 
+/** Lucide dropped brand icons, so the Instagram glyph is drawn here in the same 24px, 2px-stroke style. */
+function InstagramIcon({ size }: { size: number }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <rect x="2" y="2" width="20" height="20" rx="5" />
+      <circle cx="12" cy="12" r="4" />
+      <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+    </svg>
+  );
+}
+
 /** Interest option labels in one language: the visitor's for display, English for what is sent. */
 async function interestLabels(locale: Locale): Promise<Record<string, string>> {
   const [tc, tp] = await Promise.all([
@@ -64,6 +85,10 @@ export default async function Contact() {
             <a href={contact.location.href} target="_blank" rel="noopener noreferrer" className={styles.chip}>
               <MapPin size={20} aria-hidden="true" />
               {contact.location.label}
+            </a>
+            <a href={contact.instagram.href} target="_blank" rel="noopener noreferrer me" className={styles.chip}>
+              <InstagramIcon size={20} />
+              {contact.instagram.label}
             </a>
             <aside className={styles.note}>
               <p className={styles.noteTitle}>{t("noteTitle")}</p>
