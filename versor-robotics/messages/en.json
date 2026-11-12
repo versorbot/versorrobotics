@@ -123,6 +123,7 @@
     "lede": "Running a farm, a research plot, or a co-op? Tell us about your fields and we will tell you what a Versor fleet could do on them.",
     "noteTitle": "Pilot program",
     "noteText": "Tell us about your crops, your acreage and your biggest bottleneck. A real person will reply.",
+    "interestLink": "Farmer or customer? Register your interest",
     "name": "Name",
     "namePlaceholder": "Farm name / your name",
     "email": "Email",
@@ -151,15 +152,12 @@
     "lede": "We are engineers building machines that smell like soil and keep going when the day gets long. Come build the fleet with us.",
     "apply": "Apply now",
     "hello": "Say hello",
-    "applySubject": "Application: Versor Robotics",
     "openRoles": "Open roles",
-    "teamLocation": "Team / Location",
-    "formTitle": "Versor Robotics application form",
+    "teamType": "Team / Type",
     "roles": {
-      "manipulation": { "title": "Robotics Engineer (Manipulation)", "team": "Hardware", "where": "Onsite" },
-      "perception": { "title": "Perception Engineer (Crop Vision)", "team": "AI", "where": "Hybrid" },
-      "fieldOps": { "title": "Field Operations Lead", "team": "Deployments", "where": "Onsite" },
-      "partnerships": { "title": "Farm Partnerships Manager", "team": "Growth", "where": "Remote" }
+      "embedded": { "title": "Embedded Systems Intern", "team": "Electronics", "where": "Internship" },
+      "mechanical": { "title": "Mechanical Design Intern", "team": "Mechanical", "where": "Internship" },
+      "software": { "title": "Robotics Software Intern", "team": "Software", "where": "Internship" }
     }
   },
   "game": {
@@ -208,7 +206,8 @@
     "tagline": "Grown, not mined.",
     "pilots": "Pilots",
     "simulator": "Spray simulator",
-    "economics": "Unit economics"
+    "economics": "Unit economics",
+    "interest": "Register interest"
   },
   "rover": {
     "hint": "Grab me!",
@@ -339,5 +338,41 @@
     "title": "Off the map<dot>.</dot>",
     "text": "This page is not in the field. Head back and pick another row.",
     "home": "Back to home"
+  },
+  "interest": {
+    "metaTitle": "Register your interest | Versor Robotics",
+    "metaDescription": "Farmers and customers: tell us about your farm and the crops you grow, and we will reach out when a Versor robot is available in your area.",
+    "back": "Back to contact",
+    "kicker": "Farmers & customers",
+    "title": "Register your interest<dot>.</dot>",
+    "intro": "Tell us about yourself and your farm. It takes under 2 minutes. Your answers help us plan field trials and reach out when the robot is available in your area.",
+    "privacy": "Your details stay confidential and are used only by the Versor Robotics team to contact you about our robots.",
+    "optional": "(optional)",
+    "name": "Full name",
+    "namePlaceholder": "Your name",
+    "phone": "Phone number",
+    "phonePlaceholder": "+91 98765 43210",
+    "email": "Email",
+    "emailPlaceholder": "you@example.com",
+    "location": "Location",
+    "locationPlaceholder": "Village / town, district, state",
+    "crops": "Crops you grow",
+    "cropNames": {
+      "tomato": "Tomato",
+      "chilli": "Chilli",
+      "groundnut": "Groundnut",
+      "cotton": "Cotton",
+      "other": "Other"
+    },
+    "otherLabel": "Other crops",
+    "otherPlaceholder": "Which other crops?",
+    "why": "Why are you interested in our robot?",
+    "whyPlaceholder": "What work would you like the robot to help with?",
+    "send": "Send",
+    "sending": "Sending…",
+    "sent": "Thank you! We will be in touch soon.",
+    "needCrop": "Please pick at least one crop.",
+    "needOther": "Please write which other crops you grow.",
+    "error": "That did not go through. Please check your connection and try again."
   }
 }

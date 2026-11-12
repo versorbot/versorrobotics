@@ -25,6 +25,7 @@ export default function Footer() {
           <Link href="/pilots">{t("pilots")}</Link>
           <Link href="/simulator">{t("simulator")}</Link>
           <Link href="/economics">{t("economics")}</Link>
+          <Link href="/interest">{t("interest")}</Link>
         </nav>
         <p className={styles.copy}>
           &copy; {new Date().getFullYear()} <span lang="en">{site.name}</span>. {t("tagline")}

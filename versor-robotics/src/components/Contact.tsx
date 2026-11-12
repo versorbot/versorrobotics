@@ -1,8 +1,9 @@
-import { Mail, MapPin, Phone } from "lucide-react";
+import { ArrowRight, Mail, MapPin, Phone } from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
 import Chapter from "./Chapter";
 import ContactForm, { type EnglishValues } from "./ContactForm";
 import styles from "./Contact.module.css";
+import { Link } from "@/i18n/navigation";
 import { kicker, rich } from "@/i18n/rich";
 import type { Locale } from "@/i18n/routing";
 import { C } from "@/lib/palette";
@@ -93,6 +94,10 @@ export default async function Contact() {
             <aside className={styles.note}>
               <p className={styles.noteTitle}>{t("noteTitle")}</p>
               <p>{t("noteText")}</p>
+              <Link href="/interest" className={styles.noteLink}>
+                {t("interestLink")}
+                <ArrowRight size={16} aria-hidden="true" />
+              </Link>
             </aside>
           </div>
 

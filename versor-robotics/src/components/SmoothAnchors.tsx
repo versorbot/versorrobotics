@@ -105,7 +105,8 @@ export default function SmoothAnchors() {
       const el = document.getElementById(decodeURIComponent(hash.slice(1)));
       if (!el) return;
       e.preventDefault();
-      glide(el.getBoundingClientRect().top + window.scrollY, el.closest("[data-chapter]"));
+      const margin = parseFloat(getComputedStyle(el).scrollMarginTop) || 0; // room for the fixed header, set in CSS
+      glide(el.getBoundingClientRect().top + window.scrollY - margin, el.closest("[data-chapter]"));
       history.pushState(null, "", hash);
     };
 

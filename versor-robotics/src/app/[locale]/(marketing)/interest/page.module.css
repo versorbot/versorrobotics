@@ -1,0 +1,38 @@
+.page {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: clamp(28px, 4vw, 56px);
+  align-items: start;
+  padding-top: calc(var(--header-h) + clamp(32px, 7vh, 72px));
+  padding-bottom: clamp(56px, 10vh, 112px);
+}
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 22px;
+  font-family: var(--font-label);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--cream-70);
+}
+
+.back:hover {
+  color: var(--amber);
+}
+
+.note {
+  margin: 18px 0 0;
+  font-size: 14px;
+  color: var(--cream-50);
+}
+
+@media (max-width: 900px) {
+  .page {
+    grid-template-columns: 1fr;
+  }
+}

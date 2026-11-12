@@ -54,9 +54,7 @@ Until a video exists, visitors see a "Demo reel coming soon" screen instead of a
 ## Google Forms
 
 ### Join us
-Create a Google Form for applications, click **Send → link**, and paste it into `site.forms.join.url`. "Apply now" and every open role will open it in a new tab. To show the form inline on the page too, also paste the iframe `src` from **Send → `<>` Embed HTML** into `site.forms.join.embedUrl`.
-
-Until a link is set, "Apply now" opens an email to `contact.email` instead.
+Each open role has its own Google Form: `roles` in `src/lib/site.ts` pairs a role id with the form's share link (**Send → link**), and the role's title, team and type are under `join.roles.<id>` in every message file. Clicking a role opens its form in a new tab; "Apply now" scrolls to the list. The application forms ask applicants to sign in to Google (e.g. to upload a CV), so they can't be rebuilt as styled forms on the site like the contact form.
 
 ### Contact form (styled form that posts into a Google Form)
 1. Create a Google Form with four questions, **short answer** unless noted: *Name*, *Email*, *Interested in*, *Message* (paragraph). Don't require sign-in and don't add file uploads.
@@ -64,6 +62,9 @@ Until a link is set, "Apply now" opens an email to `contact.email` instead.
 3. Field ids: in the form editor click **⋮ → Get pre-filled link**, type a dummy answer into each question, click **Get link**. The URL contains `entry.123456789=…` for each question. Paste each id into `site.forms.contact.fields`.
 
 Responses then land in the form's **Responses** tab (and a linked Google Sheet if you add one). Until `action` is set, the form opens the visitor's email app instead, so no enquiry is lost.
+
+### Farmer & customer interest form (`/interest`)
+Connected the same way as the contact form, in `site.forms.interest` (`action` plus one `entry.…` id per question). The crop checkboxes send the Google Form's own option text, listed in `site.forms.interest.crops`, so if you rename an option in Google Forms, change it there too; a ticked "Other" box sends the typed crops as the form's "Other" answer. Linked from the Contact section and the footer.
 
 ## How the interesting bits work
 

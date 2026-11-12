@@ -5,7 +5,7 @@ import { site } from "@/lib/site";
 import { localePath, routing, type Locale } from "./routing";
 
 /** Every public page, as its English path. Used for the sitemap. */
-export const pages = ["/", "/pilots", "/simulator", "/economics"] as const;
+export const pages = ["/", "/pilots", "/simulator", "/economics", "/interest"] as const;
 
 /** Absolute address of a page in a given language: ("hi", "/pilots") → "https://www.versorbots.com/hi/pilots". */
 export function absoluteUrl(locale: Locale, path = "/"): string {

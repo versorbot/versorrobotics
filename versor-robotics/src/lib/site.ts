@@ -10,10 +10,15 @@ interface SiteConfig {
   url: string;
   video: { src: string; poster: string; youtubeId: string };
   forms: {
-    join: { url: string; embedUrl: string };
     contact: {
       action: string;
       fields: { name: string; email: string; interest: string; message: string };
+    };
+    interest: {
+      action: string;
+      fields: { name: string; email: string; phone: string; location: string; crops: string; why: string };
+      /** crop id → the option's exact text in the Google Form (what is sent). Anything else goes in as "Other". */
+      crops: Record<"tomato" | "chilli" | "groundnut" | "cotton", string>;
     };
   };
 }
@@ -44,19 +49,15 @@ export const site: SiteConfig = {
   },
 
   /* ── GOOGLE FORMS ────────────────────────────────────────────
-   * join:    paste your form's share link. "Apply now" and every role open it.
-   *          Optional `embedUrl` shows the form inline on the page
-   *          (Google Forms → Send → </> Embed HTML → copy the iframe src).
-   * contact: the styled contact form posts straight into a Google Form.
-   *          See README.md → "Connect the contact form" for the 3 steps.
-   *          While `action` is empty, the form falls back to opening the
-   *          visitor's email app (mailto) so nothing is ever lost.
+   * Job applications: each role opens its own form, see `roles` below.
+   * contact:  the styled contact form posts straight into a Google Form.
+   *           See README.md → "Connect the contact form" for the 3 steps.
+   *           While `action` is empty, the form falls back to opening the
+   *           visitor's email app (mailto) so nothing is ever lost.
+   * interest: the /interest page's farmer & customer form, connected the same way.
+   *           If a question is edited in Google Forms, its entry id here must match.
    */
   forms: {
-    join: {
-      url: "", // e.g. "https://forms.gle/xxxxxxxx"
-      embedUrl: "", // e.g. "https://docs.google.com/forms/d/e/XXXX/viewform?embedded=true"
-    },
     contact: {
       action: "https://docs.google.com/forms/d/e/1FAIpQLSf4PRk88ng_O9EXkML1_RW2-Xx28T_REU2P9DJ-fV4rqG-Riw/formResponse",
       fields: {
@@ -65,6 +66,18 @@ export const site: SiteConfig = {
         interest: "entry.2015715880",
         message: "entry.8242097",
       },
+    },
+    interest: {
+      action: "https://docs.google.com/forms/d/e/1FAIpQLSfqdFIdpFny_605f15LO_2JvnOokx_gW9XG3wcG90UePv_vIA/formResponse",
+      fields: {
+        name: "entry.1816490546",
+        email: "entry.237924469",
+        phone: "entry.743772113",
+        location: "entry.1988438387",
+        crops: "entry.1198600103",
+        why: "entry.367475218",
+      },
+      crops: { tomato: "Tomato", chilli: "chillie's", groundnut: "Groundnut", cotton: "Cotton" },
     },
   },
 };
@@ -123,8 +136,15 @@ export const products = [
 /** Feature cards, in order. Copy: messages/<locale>.json → features.items.<id> */
 export const features = ["follow", "spray", "asr", "waypoint"] as const;
 
-/** (placeholder) open roles, in order. Copy: messages/<locale>.json → join.roles.<id> */
-export const roles = ["manipulation", "perception", "fieldOps", "partnerships"] as const;
+/**
+ * Open roles, in order, each with its Google Form. Copy: messages/<locale>.json → join.roles.<id>
+ * The forms ask applicants to sign in to Google (e.g. to upload a CV), so they open on Google rather than inside the page.
+ */
+export const roles = [
+  { id: "embedded", form: "https://forms.gle/BKPsgmNFPM1b3NK8A" },
+  { id: "mechanical", form: "https://forms.gle/n6jy46JtUjE667Gd8" },
+  { id: "software", form: "https://forms.gle/bKJmRGCoEsKtJbRB8" },
+] as const;
 
 /** Nav + section order. Each id matches a chapter's anchor id; labels are in messages/<locale>.json → nav.<id> */
 export const nav = ["vision", "video", "products", "features", "contact", "join", "play"] as const;

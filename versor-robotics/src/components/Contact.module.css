@@ -49,6 +49,19 @@ a.chip:hover {
   margin: 0;
 }
 
+.noteLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  font-weight: 700;
+  color: var(--amber);
+}
+
+.noteLink:hover {
+  color: var(--cream);
+}
+
 .noteTitle {
   margin-bottom: 8px !important;
   font-family: var(--font-label);
