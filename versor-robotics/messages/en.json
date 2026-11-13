@@ -49,7 +49,7 @@
         "text": "Our collaborative robot moves around on its own, follows you and carries the load, so your hands stay free. A light touch guides it anywhere, no hard pushing. Tested carrying loads at FPO Anekal and an Army base workshop."
       },
       "spray": {
-        "text": "Our spraying robot looks at the plant from the side and opens only the nozzles with a leaf in front of them. The whole leaf is wetted and gaps get nothing."
+        "text": "Our spraying robot spot-sprays. A camera watches the plants beside it, and each nozzle opens only when the camera sees a plant in front of it. The whole leaf is wetted and gaps get nothing."
       }
     },
     "closing": "Where we are going: a robot that works with the farmer, not instead of the farmer, built in India for Indian crop rows."
@@ -80,11 +80,11 @@
       },
       "spray": {
         "kind": "Spraying robot",
-        "tagline": "A column of nozzles rides down the crop row and sprays each plant from the side, only where there is a leaf.",
+        "tagline": "A column of nozzles rides down the crop row and spot-sprays each plant from the side, only where its camera sees a plant.",
         "points": {
           "1": "Sprays from the side, under the leaf",
-          "2": "Looks at the plant as it goes",
-          "3": "Fires only at leaves, so gaps get nothing"
+          "2": "A camera watches each plant as it goes",
+          "3": "A nozzle opens only when a plant is in front of it"
         }
       }
     }
@@ -100,8 +100,8 @@
         "status": "Following"
       },
       "spray": {
-        "title": "Leaf-Only Spraying",
-        "text": "It looks at each plant and sprays it from the side. Only the nozzles with a leaf in front of them open, so gaps get nothing.",
+        "title": "Spot Spraying",
+        "text": "A camera watches the plants as the robot drives. Each nozzle in the array opens only when the camera sees a plant in front of it, so every plant is sprayed from the side and the gaps get nothing.",
         "diagram": "Top-down map: a spraying rover drives across crop rows and wets them"
       },
       "asr": {
